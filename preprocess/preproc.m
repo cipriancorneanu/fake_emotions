@@ -14,54 +14,69 @@ rectInserter = vision.ShapeInserter('Shape','Rectangles', 'LineWidth', 2, 'Borde
 faceDetector = vision.CascadeObjectDetector('MinSize', [150 150],'MergeThreshold', 5); 
 
 %% Init variables
-expandRoi = [-50 -50 100 100];
-roi = [1 1 vidObj.Width vidObj.Height];
-offset = [0 0 0 0];
-visualize = 1;
-k = 0
+expansion = int16([-50 -50 100 100]);
+roi = int16([1 1 vidObj.Width vidObj.Height]);
+visualize = 0;
+k = 0;
+        
+%% Extract Face Loop
+while hasFrame(vidObj) 
+    if rem(k,4)==0
+        fprintf('Processing frame %d\n', k);
 
-%% Processing Loop
-while hasFrame(vidObj)
-    fprintf('Processing frame %d\n', k);
-    
-    % Read frame
-    frame = readFrame(vidObj);    
-      
-    % Extract ROI   
-    target = frame(roi(2):roi(2)+roi(4)-1, roi(1):roi(1)+roi(3)-1, :); 
-    offset_target = [roi(1)-1 roi(2)-1];
-    
-    % Detect face     
-    detection = round(step(faceDetector, target));    
+        % Read frame
+        frame = readFrame(vidObj);    
+
+        % Extract ROI   
+        target = frame(roi(2):roi(2)+roi(4)-1, roi(1):roi(1)+roi(3)-1, :); 
+        %offset_target = int16([roi(1)-1 roi(2)-1]);
+
+        % Detect face     
+        detection = int16(round(step(faceDetector, target)));    
+
+        % If face detected 
+        if ~isempty(detection)   
+
+            % Transform to frame coordinates
+            detection = detection + [roi(1)-1 roi(2)-1 0 0];
+
+            % Extract detection
+            extraction = imresize(frame(detection(2):detection(2)+detection(4)-1,...
+                                detection(1):detection(1)+detection(3)-1, :), [200,200]);
+
+            extracted(:,:,:,k/4+1) = extraction;                
+
+            % Define roi for next frame  
+            roi = detection + expansion; 
+        else
+            % If face not detected reinit ROI and offset
+           roi = [1 1 vidObj.Width vidObj.Height];
+        end
+
+        %{if visualize
+        %    imshow(extraction);pause(0.25);
+        %end
        
-    % If face detected 
-    if ~isempty(detection)   
-                
-        % Fit shape
-        %[shape, ~] = fitFrame(target, detection, model);
-
-        % Place shape in frame
-        %circles = [int16(repmat(offset_target,length(shape),1) + shape) ...
-        %                 4*ones(length(shape),1)];
-        rectangle = int16(detection + [offset_target 0 0]);
-        
-        % Paint on frame
-        %frame = step(circleInserter, frame, circles);
-        frame = step(rectInserter, frame, rectangle);
-        
-        % Define roi for next frame  
-        roi = [offset_target 0 0] + detection + expandRoi;
-        %offset = [roi(2) roi(1) 0 0]; 
-    else
-        % If face not detected reinit ROI and offset
-       roi = [1 1 vidWidth vidHeight];
     end
-    
-    if visualize %&& rem(k,10)==0
-        imshow(frame);pause(0.25);
-    end
-    
-    %writeVideo(vidObjOut,frame);
-           
     k = k+1;
 end
+
+%% Load geometry estimation model
+model = importdata('./models/model_rcpr_300w.mat');
+
+%% Align Face Loop
+for i = 1:size(extracted,4)
+   
+    
+end
+
+
+%% Visualize
+% Place shape in frame
+%circles = [int16(repmat(offset_target,length(shape),1) + shape) ...
+%                         4*ones(length(shape),1)];
+%[shape, ~] = fitFrame(target, detection, model);
+
+% Paint on frame
+%frame = step(circleInserter, frame, circles);
+%frame = step(rectInserter, frame, rectangle);
