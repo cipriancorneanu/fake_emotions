@@ -54,4 +54,4 @@ for layer_name, blob in net.blobs.iteritems():
     print layer_name + '\t' + str(blob.data.shape)
 
 #EXAMPLE OF EXTRACTING FEAT FROM POOL5 LAYER
-feat = net.blobs['pool5'].data[0]
+feat = net.blobs['fc7'].data[0]
