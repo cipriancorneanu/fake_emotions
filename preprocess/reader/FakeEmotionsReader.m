@@ -19,7 +19,7 @@ classdef FakeEmotionsReader < DataReader
             
             for person = 1:length(PersonSubdirs) 
                 fprintf(strcat('Reading person:\t', PersonSubdirs{person}, '\n'));                              
-                Path = strcat(obj.DataPath, PersonSubdirs{person}, filesep);
+                PathPers = strcat(obj.DataPath, PersonSubdirs{person}, filesep);
                 images = [];
                 landmarks = [];
                 emotions = {};
@@ -27,15 +27,15 @@ classdef FakeEmotionsReader < DataReader
             
                 % Get all subdirs in path; each one corresponds to a
                 % different label
-                LabelSubdirs = GetSubdirs(obj, Path);
+                LabelSubdirs = GetSubdirs(obj, PathPers);
                 
                 for label = 1:length(LabelSubdirs)
                     fprintf(strcat('Reading emotion:\t', LabelSubdirs{person}, '\n'));  
                     
                     % Get all files from each subdir. Each one corresponds
                     % to a different frame
-                    Path = strcat(Path, LabelSubdirs{label}, filesep);
-                    rgb_files = GetFiles(obj, Path, '*.png');   
+                    PathEmo = strcat(PathPers, LabelSubdirs{label}, filesep);
+                    rgb_files = GetFiles(obj, PathEmo, '*.png');   
                     
                     % Sort files
                     tokens = cellfun(@(x) strsplit(x,'['), rgb_files, 'UniformOutput', false);
