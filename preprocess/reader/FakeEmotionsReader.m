@@ -30,18 +30,25 @@ classdef FakeEmotionsReader < DataReader
                 LabelSubdirs = GetSubdirs(obj, PathPers);
                 
                 for label = 1:length(LabelSubdirs)
-                    fprintf(strcat('Reading emotion:\t', LabelSubdirs{person}, '\n'));  
+                    fprintf(strcat('Reading emotion:\t', LabelSubdirs{label}, '\n'));  
                     
                     % Get all files from each subdir. Each one corresponds
                     % to a different frame
                     PathEmo = strcat(PathPers, LabelSubdirs{label}, filesep);
                     rgb_files = GetFiles(obj, PathEmo, '*.png');   
                     
-                    % Sort files
-                    tokens = cellfun(@(x) strsplit(x,'['), rgb_files, 'UniformOutput', false);
-                    tokens = cellfun(@(x) x(1), tokens);
-                    [tokens, idx] = sort(cellfun(@(x) str2num(x), tokens));
-                    rgb_files = rgb_files(:,idx);
+                    % Sort files by taking into account fname format
+                    if strcmp(rgb_files{1}(1),'f')
+                        tokens = cellfun(@(x) strsplit(x,'.'), rgb_files, 'UniformOutput', false);
+                        tokens = cellfun(@(x) x(1), tokens);
+                        [tokens, idx] = sort(cellfun(@(x) str2num(x(6:end)), tokens));
+                        rgb_files = rgb_files(:,idx);                        
+                    else
+                        tokens = cellfun(@(x) strsplit(x,'['), rgb_files, 'UniformOutput', false);
+                        tokens = cellfun(@(x) x(1), tokens);
+                        [tokens, idx] = sort(cellfun(@(x) str2num(x), tokens));
+                        rgb_files = rgb_files(:,idx);
+                    end
                                     
                     % Init containers
                     numFrames = length(rgb_files);
@@ -50,7 +57,9 @@ classdef FakeEmotionsReader < DataReader
                     emos = cell(numFrames,1);
 
                     for i = 1:30%length(rgb_files)
-                        frame = imread(strcat(Path, rgb_files{i}));
+                        fprintf(strcat('Reading emotion:\t', int2str(i), '\n'));
+                        
+                        frame = imread(strcat(PathEmo, rgb_files{i}));
 
                         % Fit shape
                         [geom, ~] = fitFrame(frame, [1 1 224 224], model);
