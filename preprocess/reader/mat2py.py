@@ -22,23 +22,21 @@ def load_fake(path, fname):
 
     return dt
 
-def process_fake(lms, emos):
-    for person in range(0,len(lms)):
-        split_seq(emos[person])
+def process_fake(dt):
+    split =  [split_seq(person['emos']) for person in dt]
 
-    return 0
+    #TODO Split data into classes (subject, emo, fake/true)
+    pass
 
 def split_seq(emos):
     labels = ['act_ANGRY', 'act_CONTEMPT', 'act_DISGUST', 'act_HAPPY', 'act_SAD', 'act_SURPISED',
-    'act_ANGRY', 'act_CONTEMPT', 'act_DISGUST', 'act_HAPPY', 'act_SAD', 'act_SURPISED']
+    'fake_ANGRY', 'fake_CONTEMPT', 'fake_DISGUST', 'fake_HAPPY', 'fake_SAD', 'fake_SURPISED']
 
-    emos = [e[0][0] for e in emos]
+    # Extract emo labels
+    emos = np.asarray([e[0][0] for e in emos])
 
-    for i,l in enumerate(labels):
-        partitions[i] = emos==l
-
-    return partitions
-
+    # Split according to labels
+    return [emos==l for i,l in enumerate(labels)]
 
 if __name__ == '__main__':
     path2geoms = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/'
@@ -49,8 +47,7 @@ if __name__ == '__main__':
     dt = load_fake(path2geoms, 'femo.pkl')
 
     # Split geoms
-
-    smth = process_fake(dt['lms'], dt['emos'])
+    smth = process_fake(dt)
 
     # Load images
     subjects = sorted([f for f in os.listdir(path2ims)])
