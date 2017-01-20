@@ -30,7 +30,7 @@ classdef FakeEmotionsReader < DataReader
                 LabelSubdirs = GetSubdirs(obj, PathPers);
                 
                 for label = 1:length(LabelSubdirs)
-                    fprintf(strcat('Reading emotion:\t', LabelSubdirs{label}, '\n'));  
+                    fprintf(strcat('   Reading emotion:\t', LabelSubdirs{label}, '\n'));  
                     
                     % Get all files from each subdir. Each one corresponds
                     % to a different frame
@@ -56,15 +56,15 @@ classdef FakeEmotionsReader < DataReader
                     lms = zeros(numFrames,29,2);
                     emos = cell(numFrames,1);
 
-                    for i = 1:30%length(rgb_files)
-                        fprintf(strcat('Reading emotion:\t', int2str(i), '\n'));
+                    for i = 1:length(rgb_files)
+                        %fprintf(strcat('       Reading frame:\t', int2str(i), '\n'));
                         
                         frame = imread(strcat(PathEmo, rgb_files{i}));
 
                         % Fit shape
                         [geom, ~] = fitFrame(frame, [1 1 224 224], model);
 
-                        ims(i,:,:,:) = frame;        
+                        %ims(i,:,:,:) = frame;        
                         lms(i,:,:) = geom;
                         emos{i} = LabelSubdirs{label};
                         
@@ -82,8 +82,8 @@ classdef FakeEmotionsReader < DataReader
                 end
                 
                 % Write to file
-                out = {images, landmarks, emotions};
-                save(strcat(obj.SavePath, num2str(person), '.mat'), 'out', '-v7.3');
+                out = {landmarks, emotions};
+                save(strcat(obj.SavePath, PersonSubdirs{person}, '.mat'), 'out');
             end
         end
     end  
