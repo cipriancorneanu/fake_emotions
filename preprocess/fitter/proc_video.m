@@ -27,7 +27,7 @@ function [ ims, lms, emos ] = proc_video( path, fname )
     %down_sampling = 4;
 
     %% Extract Face Loop
-    while k<2%hasFrame(vidObj) 
+    while k<10 %hasFrame(vidObj) 
         fprintf('Processing frame %d\n', k);
 
         % Read frame
@@ -35,7 +35,6 @@ function [ ims, lms, emos ] = proc_video( path, fname )
 
         % Extract ROI   
         target = frame(roi(2):roi(2)+roi(4)-1, roi(1):roi(1)+roi(3)-1, :); 
-        %offset_target = int16([roi(1)-1 roi(2)-1]);
 
         % Detect face     
         detection = int16(round(step(faceDetector, target)));    
@@ -54,7 +53,7 @@ function [ ims, lms, emos ] = proc_video( path, fname )
             [geom, ~] = fitFrame(extraction, [1 1 224 224], model);
 
             ims(k,:,:,:) = extraction;        
-            lms(k,:,:,:) = geom;
+            lms(k,:,:) = geom;
             emos{k} = emo_tokens(1);
 
             % Define roi for next frame  
@@ -71,6 +70,5 @@ function [ ims, lms, emos ] = proc_video( path, fname )
         end
         k = k+1;
     end
-
 end
 
