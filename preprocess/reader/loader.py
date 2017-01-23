@@ -4,10 +4,7 @@ import scipy.io
 import os
 import numpy as np
 import cPickle
-import reader
-import plotter
 import matplotlib.pyplot as plt
-
 
 def load_fake(path, fname):
     if os.path.exists(path+fname):
@@ -32,7 +29,6 @@ def process_fake(dt):
 def emo_mapping(label):
     labels = {'act_ANGRY':0, 'act_CONTEMPT':1, 'act_DISGUST':2, 'act_HAPPY':3, 'act_SAD':4, 'act_SURPRISED':5,
     'fake_ANGRY':6, 'fake_CONTEMPT':7, 'fake_DISGUST':8, 'fake_HAPPY':9, 'fake_SAD':10, 'fake_SURPRISED':11}
-
     return labels[label]
 
 
