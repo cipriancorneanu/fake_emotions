@@ -1,5 +1,5 @@
 
-path = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/'
+path = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/';
 
 % Define reader class
 fEmoReader = FakeEmotionsReader(path, path);
