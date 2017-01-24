@@ -48,13 +48,11 @@ net.blobs['data'].reshape(1,        # batch size
 #INPUT FACE IMAGE HERE
 
 
-for root, dirs, filenames in os.walk("/data/hupba2/Datasets/FakefaceDataProc/Extracted_faces"):
+for root, dirs, filenames in os.walk("/data/hupba2/Datasets/Cohn-Kanade/cohn-kanade-images"):
     for f in filenames:
         filepath =  os.path.join(root, f)
         ext = os.path.splitext(filepath)[-1].lower()
-        [head, action] = os.path.split(root)
-        actor = os.path.basename(head)
-        print root
+        print filepath
         if ext == '.png':
            image = caffe.io.load_image(os.path.join(root, f))
            transformed_image = transformer.preprocess('data', image)
@@ -64,7 +62,7 @@ for root, dirs, filenames in os.walk("/data/hupba2/Datasets/FakefaceDataProc/Ext
            output = net.forward()
            feat = net.blobs['fc7'].data[0]
            (files, ext)=  os.path.splitext(f)
-           filep = "/data/hupba2/Derived/CNNFacefeat/VGGOrigFC7Fake/"+ files+"_"+actor+"_"+action+".pkl"        
+           filep = "/data/hupba2/Derived/CNNFacefeat/VGGOrigFC7/"+ files+".pkl"        
            pickle.dump( feat, open( filep, "wb" ) )
 
 # for each layer, show the output shape

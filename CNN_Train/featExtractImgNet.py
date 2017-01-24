@@ -1,8 +1,6 @@
 # set up Python environment: numpy for numerical routines, and matplotlib for plotting
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-import pickle
 
 # The caffe module needs to be on the Python path;
 #  we'll add it here explicitly.
@@ -17,8 +15,8 @@ import caffe
 caffe.set_device(2)
 caffe.set_mode_gpu()
 
-model_def = '/home/kulkarni/Vision/faces/vgg_face_caffe/VGG_FACE_deploy.prototxt'
-model_weights = '/home/kulkarni/Vision/faces/vgg_face_caffe/VGG_FACE.caffemodel'
+model_def = caffe_root + 'models/bvlc_reference_caffenet/deploy.prototxt'
+model_weights = caffe_root + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel'
 
 net = caffe.Net(model_def,      # defines the structure of the model
                 model_weights,  # contains the trained weights
@@ -26,7 +24,10 @@ net = caffe.Net(model_def,      # defines the structure of the model
 
 #ENTER IMAGE MEANS HERE
 
-mu = np.array([129.1863,104.7624,93.5940] )
+# load the mean ImageNet image (as distributed with Caffe) for subtraction
+mu = np.load(caffe_root + 'python/caffe/imagenet/ilsvrc_2012_mean.npy')
+mu = mu.mean(1).mean(1)  # average over pixels to obtain the mean (BGR) pixel values
+print 'mean-subtracted values:', zip('BGR', mu)
 
 
 
@@ -42,38 +43,26 @@ transformer.set_channel_swap('data', (2,1,0))  # swap channels from RGB to BGR
 #  with the default; we can also change it later, e.g., for different batch sizes)
 net.blobs['data'].reshape(1,        # batch size
                           3,         # 3-channel (BGR) images
-                          224, 224)  # image size is 227x227
+                          227, 227)  # image size is 227x227
 
 
 #INPUT FACE IMAGE HERE
 
+image = caffe.io.load_image(caffe_root + 'examples/images/cat.jpg')
+transformed_image = transformer.preprocess('data', image)
 
-for root, dirs, filenames in os.walk("/data/hupba2/Datasets/FakefaceDataProc/Extracted_faces"):
-    for f in filenames:
-        filepath =  os.path.join(root, f)
-        ext = os.path.splitext(filepath)[-1].lower()
-        [head, action] = os.path.split(root)
-        actor = os.path.basename(head)
-        print root
-        if ext == '.png':
-           image = caffe.io.load_image(os.path.join(root, f))
-           transformed_image = transformer.preprocess('data', image)
-           # copy the image data into the memory allocated for the net
-           net.blobs['data'].data[...] = transformed_image
-           ### perform classification
-           output = net.forward()
-           feat = net.blobs['fc7'].data[0]
-           (files, ext)=  os.path.splitext(f)
-           filep = "/data/hupba2/Derived/CNNFacefeat/VGGOrigFC7Fake/"+ files+"_"+actor+"_"+action+".pkl"        
-           pickle.dump( feat, open( filep, "wb" ) )
+# copy the image data into the memory allocated for the net
+net.blobs['data'].data[...] = transformed_image
+
+### perform classification
+output = net.forward()
+
 
 # for each layer, show the output shape
-#for layer_name, blob in net.blobs.iteritems():
-#   print layer_name + '\t' + str(blob.data.shape)
+for layer_name, blob in net.blobs.iteritems():
+    print layer_name + '\t' + str(blob.data.shape)
 
-#EXAMPLE OF EXTRACTING FEAT FROM POOL5 LAYE
-#feat = net.blobs['fc7'].data[0]
-#print(np.nonzero(feat))
-#print(feat[4075])
-#print(feat.flatten())
+#EXAMPLE OF EXTRACTING FEAT FROM POOL5 LAYER
+feat = net.blobs['fc7'].data[0]
 
+print(feat.flatten())
