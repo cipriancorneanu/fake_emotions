@@ -5,13 +5,49 @@ import os
 import numpy as np
 import cPickle
 import matplotlib.pyplot as plt
+import preprocess.processor.encoder as enc
+
+def load_baseline(path, fname):
+    if os.path.exists(path+fname):
+        return cPickle.load(open(path+fname, 'rb'))
+
+    # Load data
+    path2data = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/'
+    data = np.asarray(load_fake(path, 'femo.pkl'))
+
+    # Split in the two classes
+    true = np.concatenate([x[:6] for x in data])
+    fake = np.concatenate([x[6:] for x in data])
+
+    # Prepare for processing
+    uncoded = list(true) + list(fake)
+
+    # Concatenate sequences
+    uncoded, uncoded_slices = (np.concatenate(uncoded), slice(uncoded))
+
+    # Encode (procustes + pca)
+    coded, mean, T = enc.encode_parametric(uncoded)
+
+    # Keep non-rigid params only
+    coded = coded[:,:4]
+
+    # Split back
+    data = [coded[us] for us in uncoded_slices]
+    target = np.asarray(
+        np.concatenate([np.ones((len(uncoded_slices)/2,1)), 0*np.ones((len(uncoded_slices)/2,1))]),
+        dtype=np.int
+    )
+
+    cPickle.dump((data, target), open(path+fname, 'wb'), cPickle.HIGHEST_PROTOCOL)
+
+    return (data, target)
 
 def load_fake(path, fname):
     if os.path.exists(path+fname):
         return cPickle.load(open(path+fname, 'rb'))
 
     files = [f for f in os.listdir(path)]
-    files = [files[i] for i in  np.argsort([int(f.split('.')[0]) for f in os.listdir(path)])]
+    files = [files[i] for i in  np.argsort([int(f.split('.')[0]) for f in os.listdir(path) if f.endswith('.mat')])]
 
     dt = []
     for file in files:
@@ -46,6 +82,10 @@ if __name__ == '__main__':
     path2geoms = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/'
     path2ims = '/Users/cipriancorneanu/Research/data/fake_emotions/samples/'
     path2save = '/Users/cipriancorneanu/Research/data/fake_emotions/results/'
+
+    # Load baseline
+    load_baseline(path2geoms, 'femo_pca.pkl')
+
 
     # Load geoms
     dt = load_fake(path2geoms, 'femo.pkl')

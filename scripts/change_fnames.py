@@ -13,11 +13,11 @@ for dir in os.listdir(path):
                 elif '[' in f:
                     root = f.split('[')[0]
                 else:
-                    root = f.split('.')
+                    root = f.split('.')[0]
 
                 ext = '0'*(5 - len(root))
 
                 print os.path.join(path,dir,emo,ext+root)
 
-                #os.rename(f, ext+root)
+                #os.rename(f, ext+root+'.png')
 
