@@ -17,7 +17,4 @@ for dir in os.listdir(path):
 
                 ext = '0'*(5 - len(root))
 
-                print os.path.join(path,dir,emo,ext+root)
-
-                #os.rename(f, ext+root+'.png')
-
+    
