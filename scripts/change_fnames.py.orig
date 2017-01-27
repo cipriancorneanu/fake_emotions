@@ -16,4 +16,14 @@ for dir in os.listdir(path):
                     root = f.split('.')[0]
 
                 ext = '0'*(5 - len(root))
+<<<<<<< HEAD
+
+                print os.path.join(path,dir,emo,ext+root)
+
+                #os.rename(f, ext+root+'.png')
+=======
+                print os.path.join(path,dir,emo,f)
+                print os.path.join(path,dir,emo,ext+root+'.png')
+                os.rename(os.path.join(path,dir,emo,f), os.path.join(path,dir,emo,ext+root+'.png'))
+>>>>>>> 12f3a338b38a072037854a1d4c18d5ba6a67866c
 

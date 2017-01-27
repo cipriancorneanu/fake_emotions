@@ -13,7 +13,7 @@ def load_baseline(path, fname):
 
     # Load data
     path2data = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/'
-    data = np.asarray(load_fake(path, 'femo.pkl'))
+    data = np.asarray(load_fake(path, 'femo_geom_raw.pkl'))
 
     # Split in the two classes
     true = np.concatenate([x[:6] for x in data])
@@ -84,31 +84,4 @@ if __name__ == '__main__':
     path2save = '/Users/cipriancorneanu/Research/data/fake_emotions/results/'
 
     # Load baseline
-    load_baseline(path2geoms, 'femo_pca.pkl')
-
-
-    # Load geoms
-    dt = load_fake(path2geoms, 'femo.pkl')
-
-    # Load images
-    subjects = sorted([f for f in os.listdir(path2ims)])
-    for subject in subjects:
-        emos = [f for f in os.listdir(path2ims+subject)]
-
-        for emo in emos:
-            frames, _ = reader.get_files(path2ims+subject+'/'+emo)
-            tokens = [int(x.split('.')[0][5:]) for x in frames]
-            frames = [frames[x] for x  in np.argsort(tokens)]
-
-            idx_emo = emo_mapping(emo)
-            idx_pers = int(subject)-1
-
-            for frame, lms in zip(frames[150:200:10], dt[idx_pers][idx_emo][150:200:10]):
-                im = reader.read_image(path2ims+'/'+subject+'/'+emo+'/'+ frame)
-                fig, ax = plt.subplots()
-                ax.scatter(lms[:,0], lms[:,1])
-                ax.imshow(im, cmap='Greys',  interpolation='nearest')
-                #plt.text(10,10, color='w')
-
-                #plotter.plot_qualitative(ax, lms, im, label[0][0])
-                plt.savefig(path2save + subject + emo + frame)
+    load_baseline(path2geoms, 'femo_geom_proc_95.pkl')

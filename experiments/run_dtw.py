@@ -1,7 +1,7 @@
 __author__ = 'cipriancorneanu'
 
 import os
-from preprocess.reader.loader import load_baseline
+from preprocess.reader import loader
 from fastdtw import fastdtw
 from sklearn.model_selection import train_test_split
 import cPickle
@@ -35,36 +35,18 @@ if __name__ == '__main__':
     # Build partitions
     #train_part, test_part = leave_one_out(54, 12)
 
-    # Load data
+    # Load processed geometries
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/'
-    (X, y) = load_baseline(path, 'femo_baseline.pkl')
 
-    dtw(X)
+    #Load processed geometries
+    data = cPickle.load(open(path+'femo_geom_raw.pkl', 'rb'))
 
-    '''
-    for trp, tep in zip(train_part, test_part):
+    # Process
+    y = np.asarray([sample[0] for sample in y])
 
-        # Select distances
+    # Dump
+    cPickle.dump((X,y), open(path+'femo_geom_proc.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
 
-        # Perform k-NN classification
-
-        # Compute distances
-        if os.path.exists(path+'dtw_results_short.pkl'):
-            dtw_dists = cPickle.load(open(path+'dtw_results.pkl', 'rb'))
-        else:
-            dtw_dists = dtw(X_train, X_test)
-
-        # Perform 1-NN classification
-        y_test_pred = np.zeros((1,len(dtw_dists)))
-        for i,d in enumerate(dtw_dists):
-            dists = [x[0]for x in d]
-            idx = dists.index(min(dists))
-            y_test_pred[i] = y_train[i]
-
-
-        # Evaluate
-        #print accuracy_score(y_test, y_test_pred)
-    '''
 
 
 
