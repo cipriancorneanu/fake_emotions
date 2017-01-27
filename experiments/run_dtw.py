@@ -25,12 +25,6 @@ def dtw(ts_seq):
                  cPickle.HIGHEST_PROTOCOL
                  )
 
-def leave_one_out(n_pers, n_seq):
-    test = [ range(x*6, x*6+6)+range(x*6+324, x*6+330) for x in np.arange(0,n_pers)]
-    train = [ list(set(range(0,n_pers*n_seq))-set(t)) for t in test]
-
-    return (train, test)
-
 if __name__ == '__main__':
     # Build partitions
     #train_part, test_part = leave_one_out(54, 12)
