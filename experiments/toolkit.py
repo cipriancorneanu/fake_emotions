@@ -27,7 +27,10 @@ def read_femo_sift(path):
             print 'person:{} target:{}'.format(p_key[1:3],t_key)
 
             target_seq = [f for f in person_seq if t_key in f]
-            seq = [None]*len(target_seq)
+
+            # Extract frame numbers and compute last and use as length
+            last_frame = max([ int(f.split('.')[0].split('_')[0][3:]) for f in target_seq])
+            seq = [None]*last_frame
 
             # Read sequence
             for i,f in enumerate(target_seq):
