@@ -10,11 +10,11 @@ def read_femo_sift(path):
     data = [[None for _ in range(n_classes)] for _ in range(n_persons)]
 
     person_keys = ['_'+str(x)+'_' for x in np.arange(1,n_persons)]
-    target_keys = ['act_HAPPY', 'act_SAD', 'act_CONTEMPT', 'act_SUPRISED', 'act_DISGUST', 'act_ANGRY',
-                   'fake_HAPPY', 'fake_SAD', 'fake_CONTEMPT', 'fake_SUPRISED', 'fake_DISGUST', 'fake_ANGRY']
+    target_keys = ['act_HAPPY', 'act_SAD', 'act_CONTEMPT', 'act_SURPRISED', 'act_DISGUST', 'act_ANGRY',
+                   'fake_HAPPY', 'fake_SAD', 'fake_CONTEMPT', 'fake_SURPRISED', 'fake_DISGUST', 'fake_ANGRY']
 
-    mapping = {'act':{'HAPPY':0, 'SAD':1, 'CONTEMPT':2, 'SUPRISED':3, 'DISGUST':4, 'ANGRY':5},
-              'fake':{'HAPPY':6, 'SAD':7, 'CONTEMPT':8, 'SUPRISED':9, 'DISGUST':10, 'ANGRY':11}}
+    mapping = {'act':{'HAPPY':0, 'SAD':1, 'CONTEMPT':2, 'SURPRISED':3, 'DISGUST':4, 'ANGRY':5},
+              'fake':{'HAPPY':6, 'SAD':7, 'CONTEMPT':8, 'SURPRISED':9, 'DISGUST':10, 'ANGRY':11}}
 
     files = [f for f in os.listdir(path)]
 
@@ -47,7 +47,6 @@ def read_femo_sift(path):
                 data[person][target] = seq
             else:
                 print 'Target sequence empty'
-
 
     cPickle.dump(data, open(path+'femo_sift.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
     return data
