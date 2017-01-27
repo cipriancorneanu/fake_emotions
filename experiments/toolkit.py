@@ -28,22 +28,26 @@ def read_femo_sift(path):
 
             target_seq = [f for f in person_seq if t_key in f]
 
-            # Extract frame numbers and compute last and use as length
-            last_frame = max([ int(f.split('.')[0].split('_')[0][3:]) for f in target_seq])
-            seq = [None]*last_frame
+            if target_seq:
+                # Extract frame numbers and compute last and use as length
+                last_frame = max([ int(f.split('.')[0].split('_')[0][3:]) for f in target_seq])
+                seq = [None]*last_frame
 
-            # Read sequence
-            for i,f in enumerate(target_seq):
-                # Parse fname
-                tokens = f.split('.')[0].split('_')
-                category, fe, person, frame = (tokens[2], tokens[3], int(tokens[1]), int(tokens[0][3:])-1)
-                target = mapping[category][fe]
+                # Read sequence
+                for i,f in enumerate(target_seq):
+                    # Parse fname
+                    tokens = f.split('.')[0].split('_')
+                    category, fe, person, frame = (tokens[2], tokens[3], int(tokens[1]), int(tokens[0][3:])-1)
+                    target = mapping[category][fe]
 
-                # Load data
-                fdata = cPickle.load(open(path+f, 'rb'))
-                seq[frame] = np.asarray(fdata, dtype=np.int16)
+                    # Load data
+                    fdata = cPickle.load(open(path+f, 'rb'))
+                    seq[frame] = np.asarray(fdata, dtype=np.int16)
 
-            data[person][target] = seq
+                data[person][target] = seq
+            else:
+                print 'Target sequence empty'
+
 
     cPickle.dump(data, open(path+'femo_sift.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
     return data
