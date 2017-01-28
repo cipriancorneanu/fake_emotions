@@ -67,7 +67,6 @@ def emo_mapping(label):
     'fake_ANGRY':6, 'fake_CONTEMPT':7, 'fake_DISGUST':8, 'fake_HAPPY':9, 'fake_SAD':10, 'fake_SURPRISED':11}
     return labels[label]
 
-
 def split_seq(emos):
     labels = ['act_ANGRY', 'act_CONTEMPT', 'act_DISGUST', 'act_HAPPY', 'act_SAD', 'act_SURPRISED',
     'fake_ANGRY', 'fake_CONTEMPT', 'fake_DISGUST', 'fake_HAPPY', 'fake_SAD', 'fake_SURPRISED']
