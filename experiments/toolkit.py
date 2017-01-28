@@ -5,18 +5,18 @@ import os
 import scipy.io
 import numpy as np
 
-def read_femo_sift(path):
+def read_femo_sift(path2load, path2save):
     n_persons, n_classes = (54, 12)
     data = [[None for _ in range(n_classes)] for _ in range(n_persons)]
 
-    person_keys = ['_'+str(x)+'_' for x in np.arange(1,n_persons)]
+    person_keys = ['_'+str(x+1)+'_' for x in np.arange(0,n_persons)]
     target_keys = ['act_HAPPY', 'act_SAD', 'act_CONTEMPT', 'act_SURPRISED', 'act_DISGUST', 'act_ANGRY',
                    'fake_HAPPY', 'fake_SAD', 'fake_CONTEMPT', 'fake_SURPRISED', 'fake_DISGUST', 'fake_ANGRY']
 
     mapping = {'act':{'HAPPY':0, 'SAD':1, 'CONTEMPT':2, 'SURPRISED':3, 'DISGUST':4, 'ANGRY':5},
               'fake':{'HAPPY':6, 'SAD':7, 'CONTEMPT':8, 'SURPRISED':9, 'DISGUST':10, 'ANGRY':11}}
 
-    files = [f for f in os.listdir(path)]
+    files = [f for f in os.listdir(path2load)]
 
     # Slice by sequence
     for p_key in person_keys:
@@ -41,15 +41,19 @@ def read_femo_sift(path):
                     target = mapping[category][fe]
 
                     # Load data
-                    fdata = cPickle.load(open(path+f, 'rb'))
+                    fdata = cPickle.load(open(path2load+f, 'rb'))
                     seq[frame] = np.asarray(fdata, dtype=np.int16)
 
                 data[person][target] = seq
             else:
                 print 'Target sequence empty'
 
-    cPickle.dump(data, open(path+'femo_sift.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
+    print('Dumping data to ' + path2save)
+    cPickle.dump(data, open(path2save+'femo_sift.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
     return data
+
+def load_femo_sift():
+    pass
 
 def pkl2mat(path, fname):
     (X,y) = cPickle.load(open(path+fname+'.pkl', 'rb'))
@@ -69,8 +73,7 @@ def leave_one_out_femo():
     return (train, test)
 
 if __name__ == '__main__':
-    path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
+    path2load = '/data/hupba2/Derived/FaceSIFTs/'
+    path2save = '/home/corneanu/data/fake_emotions/'
 
-    read_femo_sift(path)
-
-
+    read_femo_sift(path2load, path2save)
