@@ -37,7 +37,7 @@ def read_femo_sift(path2load, path2save):
                 for i,f in enumerate(target_seq):
                     # Parse fname
                     tokens = f.split('.')[0].split('_')
-                    category, fe, person, frame = (tokens[2], tokens[3], int(tokens[1]), int(tokens[0][3:])-1)
+                    category, fe, person, frame = (tokens[2], tokens[3], int(tokens[1])-1, int(tokens[0][3:])-1)
                     target = mapping[category][fe]
 
                     # Load data
@@ -52,16 +52,12 @@ def read_femo_sift(path2load, path2save):
     cPickle.dump(data, open(path2save+'femo_sift.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
     return data
 
-def load_femo_sift():
-    pass
-
 def pkl2mat(path, fname):
     (X,y) = cPickle.load(open(path+fname+'.pkl', 'rb'))
     scipy.io.savemat(path+fname+'.mat', mdict={'X': X, 'y': y})
 
 def mat2pkl(path, fname):
     scipy.io.loadmat()
-
     pass
 
 def leave_one_out_femo():

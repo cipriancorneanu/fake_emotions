@@ -50,22 +50,29 @@ class BoVWFramework():
         # Perform some classification
 
         # Evaluate
+        pass
 
     def quantizer(self, observations, kmeans):
         n_words = kmeans.labels
         histo = np.zeros((len(observations), n_words))
 
-        [histo[kmeans.predict(word)]+=1 for word in obs for obs in observations ]
+        [histo[kmeans.predict(word)] for word in obs for obs in observations ]
 
         return histo
 
+
 if __name__ == '__main__':
+    # Load data
+    path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
+    femo = cPickle.load(open(path+'femo_sift.pkl', 'rb'))
+
+    # Concatenate data
+    femo = concatenate(femo)
+
+    # Split data
     path = 'some_path'
     bovw = BoVWFramework(path, {'n_clusters': [100, 500, 1000, 5000, 10000]})
 
     bovw.k_means()
-
-
-    pass
 
 
