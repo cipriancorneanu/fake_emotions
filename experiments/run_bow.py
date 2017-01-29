@@ -9,22 +9,22 @@ from data import Femo
 #TODO: 4. Linear SVM for 6 FEs on all representations
 
 class BoVWFramework():
-    def __init__(self, path, params):
+    def __init__(self, path, n_clusters):
         self.path = path
-        self.k_means_params = params
+        self.n_clusters = n_clusters
 
-    def k_means(self):
-        kmeans = [None]*len(self.k_means_params)
+    def k_means(self, X):
+        kmeans = []
         # Perform k-means parameter search
-        for i,n in enumerate(self.k_means_params['n_clusters']):
-            print'Computing kmeans with {} clusters'.format(n)
+        for i,n in enumerate(self.n_clusters):
+            print'  Computing kmeans with {} clusters'.format(n)
 
             #Select 10% of all data
             pool_indices = np.random.randint(0,X.shape[0], (1, int(X.shape[0]/10)))
-            X = X[pool_indices]
+            X = np.squeeze(X[pool_indices])
 
             # Perform k-means on all data
-            kmeans[i] = {'n_clusters': n, 'model': KMeans(n_clusters=n, random_state=0).fit(X)}
+            kmeans.append(KMeans(n_clusters=n, random_state=0).fit(X))
 
         return kmeans
 
@@ -59,31 +59,22 @@ if __name__ == '__main__':
     femo = cPickle.load(open(path+'femo_sift.pkl', 'rb'))
 
     femo_sift = Femo(path)
-    bovw = BoVWFramework(path, {'n_clusters': [100, 500, 1000, 5000]})
+    bovw = BoVWFramework(path, n_clusters = [100, 500, 1000])
 
     # Load data
     data = femo_sift.load()
 
     # Leave one out
-    for leave in range(0,1):
+    for leave in range(0,femo_sift.n_persons):
+        print 'Leave {} out'.format(leave)
+
         # Split data
-        X_tr, X_te = femo_sift.leave_one_out(data, leave)
+        (X_tr, y_tr), (X_te, y_te) = femo_sift.leave_one_out(data, leave)
 
         # Compute kmeans and dump
-        kmeans = bovw.k_means(np.concatenate(X_tr[0]))
+        kmeans = bovw.k_means(np.concatenate(X_tr))
+
+        print '     Dump k-means'
         cPickle.dump({'kmeans': kmeans},
-                    open(path + 'kmeans_leave_' + str(leave) + 'pkl', 'wb'),
+                    open(path + 'kmeans_leave_' + str(leave) + '.pkl', 'wb'),
                      cPickle.HIGHEST_PROTOCOL)
-
-        '''
-        # Compute bows
-        X_tr_ = bovw.bow(kmeans, X_tr)
-        X_te_ = bovw.bow(kmeans, X_te)
-        '''
-
-        # Dump representation
-        #cPickle.dump({'kmeans': kmeans, 'X_tr':X_tr, 'y_tr':y_tr, 'X_te':X_te, 'y_te':y_te},
-        #             open(self.path+'kmeans_' + str(leave) + '_' + str(n) + 'pkl', 'wb'),
-        #             cPickle.HIGHEST_PROTOCOL)
-
-

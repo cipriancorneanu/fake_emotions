@@ -79,8 +79,9 @@ class Femo:
                 for i_emo,emo in enumerate(pers):
                     if emo:
                         for frame in emo:
-                            y.append(i_emo)
-                            X.append(frame)
+                            if frame != None:
+                                y.append(i_emo)
+                                X.append(frame)
         return (X,y)
 
 if __name__ == '__main__':
