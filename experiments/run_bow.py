@@ -27,22 +27,19 @@ class BoVWFramework():
 
         return kmeans
 
-    '''
+
     def build_bow(self, kmeans, X):
-        return [for x in X]
-            # Build representation for each partition
-            X_tr = self.counter(X, kmeans)
+        histo = np.zeros((len(X), kmeans.n_clusters), dtype = np.int16)
 
-        return bow
-
-    def quantizer(self, observations, kmeans):
-        n_words = kmeans.labels
-        histo = np.zeros((len(observations), n_words))
-
-        [histo[kmeans.predict(word)] for word in obs for obs in observations ]
+        for i, (frame,h) in enumerate(zip(X, histo)):
+            words = kmeans.predict(frame)
+            for w in words:
+                h[w] += 1
 
         return histo
 
+
+    '''
     def classification(self, data, partition, n):
         data = cPickle(open(path+'kmeans_' + str(partition) + '_' + str(n) + 'pkl', 'rb'))
 
@@ -58,13 +55,13 @@ if __name__ == '__main__':
     femo = cPickle.load(open(path+'femo_sift.pkl', 'rb'))
 
     femo_sift = Femo(path)
-    bovw = BoVWFramework(path, n_clusters = [100, 500, 1000])
+    bovw = BoVWFramework(path, n_clusters = [100])
 
     # Load data
     data = femo_sift.load()
 
     # Leave one out
-    for leave in range(0,femo_sift.n_persons):
+    for leave in range(0,1):
         print 'Leave {} out'.format(leave)
 
         # Split data
@@ -77,3 +74,15 @@ if __name__ == '__main__':
         cPickle.dump({'kmeans': kmeans},
                     open(path + 'kmeans_leave_' + str(leave) + '.pkl', 'wb'),
                      cPickle.HIGHEST_PROTOCOL)
+
+        print '     Compute representation'
+        
+        # Compute representation
+        for km in kmeans:
+            X_tr = bovw.build_bow(km, X_tr)
+            X_te = bovw.build_bow(km, X_te)
+
+            print '     Dump representation'
+            cPickle.dump({'kmeans': km, 'X_tr': X_tr, 'y_tr': y_tr, 'X_te':X_te, 'y_te':y_te},
+                        open(path + str(leave) + '_' + str(km.n_clusters) + '.pkl', 'wb'),
+                         cPickle.HIGHEST_PROTOCOL)

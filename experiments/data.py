@@ -74,9 +74,9 @@ class Femo:
 
     def prepare(self, data):
         X, y = ([],[])
-        for i_pers,pers in enumerate([x for x in data if x != None]):
-                for i_emo,emo in enumerate([x for x in pers if x != None]):
-                        for frame in [x for x in emo if x != None]:
+        for i_pers,pers in enumerate([x for x in data if x is not None]):
+                for i_emo,emo in enumerate([x for x in pers if x is not None]):
+                        for frame in [x for x in emo if x is not None]:
                                 y.append(i_emo)
                                 X.append(frame)
         return (X,y)
