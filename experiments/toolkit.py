@@ -21,4 +21,3 @@ def leave_one_out_femo():
     train = [ list(set(range(0,N))-set(t)) for t in test]
 
     return (train, test)
-

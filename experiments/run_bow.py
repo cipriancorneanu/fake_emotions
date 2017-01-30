@@ -5,7 +5,6 @@ import numpy as np
 import cPickle
 from data import Femo
 
-#TODO: 3. k-means grid search
 #TODO: 4. Linear SVM for 6 FEs on all representations
 
 class BoVWFramework():
