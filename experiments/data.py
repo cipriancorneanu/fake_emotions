@@ -18,7 +18,7 @@ class Femo:
         map= {'act':{'HAPPY':0, 'SAD':1, 'CONTEMPT':2, 'SURPRISED':3, 'DISGUST':4, 'ANGRY':5},
               'fake':{'HAPPY':6, 'SAD':7, 'CONTEMPT':8, 'SURPRISED':9, 'DISGUST':10, 'ANGRY':11}}
 
-        return map[category, emo]
+        return map[category][emo]
 
     def load(self):
         if os.path.exists(self.path+'femo_sift.pkl'):
@@ -62,7 +62,10 @@ class Femo:
                     print 'Target sequence empty'
 
         print('Dumping data to ' + path2save)
-        cPickle.dump(data, open(path2save+'femo_sift.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
+
+        for i, part in enumerate([range(0,9), range(9, 18), range(18, 27), range(27,36), range(36, 45), range(45, 54)]):
+            cPickle.dump([data[x] for x in part], open(path2save+'femo_sift_'+str(i)+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
+
         return data
 
     def leave_one_out(self, data, n):
