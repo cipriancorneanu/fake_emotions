@@ -19,14 +19,13 @@ class BoVWFramework():
             print'  Computing kmeans with {} clusters'.format(n)
 
             #Select 10% of all data
-            pool_indices = np.random.randint(0,X.shape[0], (1, int(X.shape[0]/10)))
+            pool_indices = np.random.randint(0,X.shape[0], (1, int(X.shape[0]/20)))
             X = np.squeeze(X[pool_indices])
 
-            # Perform k-means on all data
+            # Perform k-means
             kmeans.append(KMeans(n_clusters=n, random_state=0).fit(X))
 
         return kmeans
-
 
     def build_bow(self, kmeans, X):
         histo = np.zeros((len(X), kmeans.n_clusters), dtype = np.int16)
@@ -38,30 +37,19 @@ class BoVWFramework():
 
         return histo
 
-
-    '''
-    def classification(self, data, partition, n):
-        data = cPickle(open(path+'kmeans_' + str(partition) + '_' + str(n) + 'pkl', 'rb'))
-
-        # Perform some classification
-
-        # Evaluate
-        pass
-    '''
-
 if __name__ == '__main__':
     # Load data
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
     femo = cPickle.load(open(path+'femo_sift.pkl', 'rb'))
 
     femo_sift = Femo(path)
-    bovw = BoVWFramework(path, n_clusters = [100])
+    bovw = BoVWFramework(path, n_clusters = [50, 100, 200])
 
     # Load data
     data = femo_sift.load()
 
     # Leave one out
-    for leave in range(0,1):
+    for leave in range(0, femo_sift.n_persons):
         print 'Leave {} out'.format(leave)
 
         # Split data
@@ -76,7 +64,7 @@ if __name__ == '__main__':
                      cPickle.HIGHEST_PROTOCOL)
 
         print '     Compute representation'
-        
+
         # Compute representation
         for km in kmeans:
             X_tr = bovw.build_bow(km, X_tr)

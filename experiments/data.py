@@ -35,7 +35,7 @@ class Femo:
         for p_key in self.person_keys:
             person_seq = [f for f in files if p_key in f]
 
-            #Slice by target
+            # Slice by target
             for t_key in self.target_keys:
                 print 'person:{} target:{}'.format(p_key[1:3],t_key)
 
