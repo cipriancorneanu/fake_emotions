@@ -5,8 +5,6 @@ import numpy as np
 import cPickle
 from data import Femo
 
-#TODO: 4. Linear SVM for 6 FEs on all representations
-
 class BoVWFramework():
     def __init__(self, path, n_clusters):
         self.path = path
@@ -40,10 +38,9 @@ class BoVWFramework():
 if __name__ == '__main__':
     # Load data
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
-    femo = cPickle.load(open(path+'femo_sift.pkl', 'rb'))
 
     femo_sift = Femo(path)
-    bovw = BoVWFramework(path, n_clusters = [50, 100, 200])
+    bovw = BoVWFramework(path, n_clusters = [50,100,200])
 
     # Load data
     data = femo_sift.load()

@@ -73,7 +73,7 @@ class Femo:
         train = list(set(all)-set([n]))
         test = n
 
-        return (self.prepare([data[x] for x in train]), self.prepare(data[n]))
+        return (self.prepare([data[x] for x in train]), self.prepare([data[n]]))
 
     def prepare(self, data):
         X, y = ([],[])

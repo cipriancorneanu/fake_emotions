@@ -35,7 +35,7 @@ if __name__ == '__main__':
             slices = middle_partition(slice(y_tr))
 
             for s in slices:
-                clf.fit(X_tr[::10], y_tr[::10])
+                clf.fit(X_tr, y_tr)
 
                 y_te_pred = clf.predict(X_te)
 
