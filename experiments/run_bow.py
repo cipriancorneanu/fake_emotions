@@ -49,7 +49,7 @@ def run_bow(argv):
     data = femo_sift.load()
 
     # Leave one out
-    for leave in range(args[0], args[1]):
+    for leave in range(int(args[0]), int(args[1])):
         print 'Leave {} out'.format(leave)
 
         # Split data
