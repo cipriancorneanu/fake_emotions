@@ -4,6 +4,7 @@ from sklearn.cluster import KMeans
 import numpy as np
 import cPickle
 from data import Femo
+import getopt, sys
 
 class BoVWFramework():
     def __init__(self, path, n_clusters):
@@ -17,7 +18,7 @@ class BoVWFramework():
             print'  Computing kmeans with {} clusters'.format(n)
 
             #Select 10% of all data
-            pool_indices = np.random.randint(0,X.shape[0], (1, int(X.shape[0]/20)))
+            pool_indices = np.random.randint(0,X.shape[0], (1, int(X.shape[0]/10)))
             X = np.squeeze(X[pool_indices])
 
             # Perform k-means
@@ -35,7 +36,9 @@ class BoVWFramework():
 
         return histo
 
-if __name__ == '__main__':
+def run_bow(argv):
+    opts, args = getopt.getopt(argv, '')
+
     # Load data
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
 
@@ -46,7 +49,7 @@ if __name__ == '__main__':
     data = femo_sift.load()
 
     # Leave one out
-    for leave in range(0, femo_sift.n_persons):
+    for leave in range(args[0], args[1]):
         print 'Leave {} out'.format(leave)
 
         # Split data
@@ -64,10 +67,13 @@ if __name__ == '__main__':
 
         # Compute representation
         for km in kmeans:
-            X_tr = bovw.build_bow(km, X_tr)
-            X_te = bovw.build_bow(km, X_te)
+            feat_X_tr = bovw.build_bow(km, X_tr)
+            feat_X_te = bovw.build_bow(km, X_te)
 
             print '     Dump representation'
-            cPickle.dump({'kmeans': km, 'X_tr': X_tr, 'y_tr': y_tr, 'X_te':X_te, 'y_te':y_te},
+            cPickle.dump({'kmeans': km, 'X_tr': feat_X_tr, 'y_tr': y_tr, 'X_te': feat_X_te, 'y_te':y_te},
                         open(path + str(leave) + '_' + str(km.n_clusters) + '.pkl', 'wb'),
                          cPickle.HIGHEST_PROTOCOL)
+
+if __name__ == "__main__":
+    run_bow(sys.argv[1:])
