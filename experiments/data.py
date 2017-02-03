@@ -4,7 +4,7 @@ import numpy as np
 import os
 import cPickle
 
-class Femo:
+class FakeEmo:
     def __init__(self, path):
         self.n_persons = 54
         self.n_classes = 12
@@ -14,7 +14,7 @@ class Femo:
         self.target_keys = ['act_HAPPY', 'act_SAD', 'act_CONTEMPT', 'act_SURPRISED', 'act_DISGUST', 'act_ANGRY',
                        'fake_HAPPY', 'fake_SAD', 'fake_CONTEMPT', 'fake_SURPRISED', 'fake_DISGUST', 'fake_ANGRY']
 
-    def map_class(self, category, emo):
+    def _map_class(self, category, emo):
         map= {'act':{'HAPPY':0, 'SAD':1, 'CONTEMPT':2, 'SURPRISED':3, 'DISGUST':4, 'ANGRY':5},
               'fake':{'HAPPY':6, 'SAD':7, 'CONTEMPT':8, 'SURPRISED':9, 'DISGUST':10, 'ANGRY':11}}
 
@@ -88,6 +88,6 @@ if __name__ == '__main__':
     path2load = '/data/hupba2/Derived/FaceSIFTs/'
     path2save = '/home/corneanu/data/fake_emotions/'
 
-    femo = Femo(path2load)
+    femo = FakeEmo(path2load)
     femo.load(path2save)
 
