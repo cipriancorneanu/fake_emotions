@@ -1,6 +1,6 @@
 __author__ = 'cipriancorneanu'
 
-from data import Femo
+from data import FakeEmo
 import cPickle
 from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
@@ -23,7 +23,7 @@ def middle_partition(slices):
 if __name__ == '__main__':
     # Init classes
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/'
-    femo = Femo(path)
+    femo = FakeEmo(path)
     clf = LinearSVC()
 
     # Leave-one-out
@@ -41,4 +41,4 @@ if __name__ == '__main__':
 
                 y_te_pred = clf.predict(X_te)
 
-                print 'Sliging {} Accuracy={}'.format(i, accuracy_score(y_te, y_te_pred))
+                print 'Slicing {} Accuracy={}'.format(i, accuracy_score(y_te, y_te_pred))

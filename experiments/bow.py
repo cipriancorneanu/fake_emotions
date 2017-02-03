@@ -53,23 +53,27 @@ def bow(path2data, path2save, n_clusters, start_person, stop_person):
     fake_emo_sift = FakeEmo(path2data)
 
     # Load data
-    data = fake_emo_sift.load('femo_sift.pkl')
+    data = fake_emo_sift.load('femo_sift.pkl')[:2]
 
     # Leave one out
     for leave in range(start_person, stop_person):
         print 'Leave {} out'.format(leave)
 
-        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='sequences')
+        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='frames')
         kmeans, feat_X_tr, feat_X_te = generate_all(X_tr, X_te, n_clusters)
 
         print '     Dump representation'
-        cPickle.dump({'kmeans': kmeans, 'X_tr': feat_X_tr, 'y_tr': y_tr, 'X_te': feat_X_te, 'y_te':y_te},
-                    open(path2save + 'leave_' + str(leave) + '.pkl', 'wb'),
-                     cPickle.HIGHEST_PROTOCOL)
+        for km, tr, te in zip(kmeans, feat_X_tr, feat_X_te):
+            cPickle.dump({'kmeans': km['kmeans'], 'X_tr': tr, 'y_tr': y_tr, 'X_te': te, 'y_te': y_te},
+                        open(path2save + str(leave) + '_' + str(km['n_clusters'])+ '.pkl', 'wb'),
+                         cPickle.HIGHEST_PROTOCOL)
 
 def run_bow(argv):
     opts, args = getopt.getopt(argv, '')
-    (path2data, path2save, n_clusters, start, stop) = (args[0], args[1], args[2], int(args[3]), int(args[4]))
+    (path2data, path2save, n_clusters, start, stop) = \
+        (
+            args[0], args[1], [int(x) for x in args[2].split(',')], int(args[3]), int(args[4])
+        )
 
     bow(path2data, path2save, n_clusters, start, stop)
 
