@@ -19,24 +19,26 @@ def middle_partition(slices):
 
     return middle_partitions
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     # Init classes
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/'
     femo = Femo(path)
     clf = LinearSVC()
 
     # Leave-one-out
-    for n_clusters in [100,500,1000]:
+    for n_clusters in [50,100,200]:
         for leave in range(0,femo.n_persons):
+            print 'Leave {}'.format(leave)
             dt = cPickle.load(open(path+str(leave)+'_'+str(n_clusters)+'.pkl', 'rb'))
+
             (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
 
             slices = middle_partition(slice(y_tr))
 
-            for s in slices:
+            for i,s in enumerate(slices):
                 clf.fit(X_tr, y_tr)
 
                 y_te_pred = clf.predict(X_te)
 
-                print accuracy_score(y_te, y_te_pred)
+                print 'Sliging {} Accuracy={}'.format(i, accuracy_score(y_te, y_te_pred))
