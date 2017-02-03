@@ -35,7 +35,7 @@ def generate_features(X, kmeans):
 def grid_generate_features(X, kmeans):
     features = [None]*len(kmeans)
     for i,km in enumerate(kmeans):
-        features[i] = {'n_clusters': km.n_clusters, 'feats': generate_features(km, X, km)}
+        features[i] = {'n_clusters': km['n_clusters'], 'feats': generate_features(X, km['kmeans'])}
 
     return features
 
