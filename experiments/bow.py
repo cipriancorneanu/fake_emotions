@@ -49,8 +49,8 @@ def generate_all(X_tr, X_te, n_clusters=[50,100,200], dump=True):
 
     return (kmeans, feat_X_tr, feat_X_te)
 
-def bow(path, n_clusters, start_person, stop_person):
-    fake_emo_sift = FakeEmo(path)
+def bow(path2data, path2save, n_clusters, start_person, stop_person):
+    fake_emo_sift = FakeEmo(path2data)
 
     # Load data
     data = fake_emo_sift.load()
@@ -64,15 +64,14 @@ def bow(path, n_clusters, start_person, stop_person):
 
         print '     Dump representation'
         cPickle.dump({'kmeans': kmeans, 'X_tr': feat_X_tr, 'y_tr': y_tr, 'X_te': feat_X_te, 'y_te':y_te},
-                    open(path + 'leave_' + str(leave) + '_out.pkl', 'wb'),
+                    open(path2save + 'leave_' + str(leave) + '.pkl', 'wb'),
                      cPickle.HIGHEST_PROTOCOL)
 
 def run_bow(argv):
     opts, args = getopt.getopt(argv, '')
-    (path, n_clusters, start, stop) = (args[0], args[1], int(args[2]), int(args[3]))
+    (path2data, path2save, n_clusters, start, stop) = (args[0], args[1], args[2], int(args[3]), int(args[4]))
 
-    bow(path, n_clusters, start, stop)
-
+    bow(path2data, path2save, n_clusters, start, stop)
 
 if __name__ == "__main__":
     run_bow(sys.argv[1:])
