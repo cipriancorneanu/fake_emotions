@@ -20,9 +20,9 @@ class FakeEmo:
 
         return map[category][emo]
 
-    def load(self):
-        if os.path.exists(self.path+'femo_sift.pkl'):
-            return cPickle.load(open(self.path+'femo_sift.pkl', 'rb'))
+    def load(self, fname):
+        if os.path.exists(self.path+fname):
+            return cPickle.load(open(self.path+fname, 'rb'))
         else:
             print 'Nothing to load'
 
@@ -68,20 +68,33 @@ class FakeEmo:
 
         return data
 
-    def leave_one_out(self, data, n):
-        all = range(0,self.n_persons)
+    def leave_one_out(self, data, n, format='frames'):
+        all = range(0,len(data))
         train = list(set(all)-set([n]))
-        test = n
+        test = [n]
 
-        return (self.prepare([data[x] for x in train]), self.prepare([data[n]]))
+        if format=='frames':
+            return (self.prepare_frames([data[x] for x in train]), self.prepare_frames([data[x] for x in test]))
+        elif format=='sequences':
+            return (self.prepare_sequences([data[x] for x in train]), self.prepare_sequences([data[x] for x in test]))
 
-    def prepare(self, data):
+    def prepare_frames(self, data):
         X, y = ([],[])
         for i_pers,pers in enumerate([x for x in data if x is not None]):
                 for i_emo,emo in enumerate([x for x in pers if x is not None]):
                         for frame in [x for x in emo if x is not None]:
                                 y.append(i_emo)
                                 X.append(frame)
+        return (X,y)
+
+    def prepare_sequences(self, data):
+        X, y = ([],[])
+        for i_pers,pers in enumerate([x for x in data if x is not None]):
+                for i_emo,emo in enumerate([x for x in pers]):
+                    if emo is not None:
+                        emo = [x for x in emo if x is not None]
+                        y.append(i_emo)
+                        X.append(np.concatenate(emo))
         return (X,y)
 
 if __name__ == '__main__':

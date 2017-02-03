@@ -53,13 +53,13 @@ def bow(path2data, path2save, n_clusters, start_person, stop_person):
     fake_emo_sift = FakeEmo(path2data)
 
     # Load data
-    data = fake_emo_sift.load()
+    data = fake_emo_sift.load('femo_sift.pkl')
 
     # Leave one out
     for leave in range(start_person, stop_person):
         print 'Leave {} out'.format(leave)
 
-        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave)
+        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='sequences')
         kmeans, feat_X_tr, feat_X_te = generate_all(X_tr, X_te, n_clusters)
 
         print '     Dump representation'
@@ -75,3 +75,6 @@ def run_bow(argv):
 
 if __name__ == "__main__":
     run_bow(sys.argv[1:])
+    '''bow('/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
+        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
+        [10], 0, 1)'''
