@@ -67,6 +67,9 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
                 X_te_sliced = [X_te[s] for s in np.asarray(np.concatenate(slice_te), dtype=np.int64)]
                 y_te_sliced = [y_te[s] for s in np.asarray(np.concatenate(slice_te), dtype=np.int64)]
 
+                print X_tr.shape
+                print X_te.shape
+
                 # Train
                 clf.fit(X_tr_sliced[::down_sampling], y_tr_sliced[::down_sampling])
 
@@ -74,8 +77,8 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
                 y_te_pred = clf.predict(X_te_sliced)
 
                 # Save results
-                cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice': s},
-                             open(path2save + str(leave) + '_' + str(n) + '.pkl', 'wb'))
+                cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice_tr': slice_tr, 'slice_te':slice_te},
+                             open(path2save + str(leave) + '_' + str(n) + '_' + str(i_s) + '.pkl', 'wb'))
 
                 # Evaluate
                 acc_frame[leave, i_n, i_s] = acc_per_frame(y_te_sliced, y_te_pred)
@@ -86,12 +89,19 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
 
 def run_classify(argv):
     opts, args = getopt.getopt(argv, '')
-    (path2data, path2save, n_clusters, partitions) = \
+    (path2data, path2save, n_clusters, partitions, ds) = \
         (
-            args[0], args[1], [int(x) for x in args[2].split(',')], [int(x) for x in args[3].split(',')]
+            args[0], args[1], [int(x) for x in args[2].split(',')], [float(x) for x in args[3].split(',')], int(args[4])
         )
 
-    classify(path2data, path2save, n_clusters, partitions)
+    classify(path2data, path2save, n_clusters, partitions, ds)
 
 if __name__ == '__main__':
-    run_classify(sys.argv[1:])
+    classify(
+        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
+        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
+        [50,100,200],
+        [0.2,0.3,0.5],
+        10
+    )
+    #run_classify(sys.argv[1:])
