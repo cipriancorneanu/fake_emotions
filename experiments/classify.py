@@ -5,13 +5,14 @@ import cPickle
 from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
 import numpy as np
+import getopt
+import sys
 
 def slice(labels):
-    borders = [i for i,(x, x_) in enumerate(zip(labels[:-1], labels[1:])) if x!=x_]
-    return [range(bmin, bmax) for bmin, bmax in zip([0]+borders[:-1], borders)]
+    borders = [i+1 for i,(x, x_) in enumerate(zip(labels[:-1], labels[1:])) if x!=x_]
+    return [range(bmin, bmax) for bmin, bmax in zip([0]+borders, borders + [len(labels)])]
 
-def middle_partition(slices):
-    partitions = [0.2, 0.3, 0.5]
+def middle_partition(slices, partitions):
     middle_partitions = [None]*len(partitions)
 
     for i,part in enumerate(partitions):
@@ -19,26 +20,78 @@ def middle_partition(slices):
 
     return middle_partitions
 
+def acc_per_frame(gt, est):
+    return accuracy_score(gt, est)
 
-if __name__ == '__main__':
+def acc_per_video(gt, est, slices):
+    gt_, est_ = ([], [])
+    for slice in slices:
+        gt_sliced =[gt[s] for s in slice]
+        est_sliced =  [est[s] for s in slice]
+
+        # Get class majority in estimation
+        h = np.histogram(est_sliced, bins=range(0,13))[0]
+
+        est_.append(np.where(h==max(h))[0][0])
+        gt_.append(gt_sliced[0])
+
+    return accuracy_score(gt_, est_)
+
+def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
     # Init classes
-    path = '/Users/cipriancorneanu/Research/data/fake_emotions/'
+    path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
     femo = FakeEmo(path)
     clf = LinearSVC()
 
     # Leave-one-out
-    for n_clusters in [50,100,200]:
-        for leave in range(0,femo.n_persons):
-            print 'Leave {}'.format(leave)
-            dt = cPickle.load(open(path+str(leave)+'_'+str(n_clusters)+'.pkl', 'rb'))
+    acc_frame = np.zeros((femo.n_persons, len(n_clusters), len(partitions)))
+    acc_video = np.zeros((femo.n_persons, len(n_clusters), len(partitions)))
+
+    for leave in range(0,femo.n_persons):
+        print 'Leave {}'.format(leave)
+        for i_n, n in enumerate(n_clusters):
+            print '     {} clusters'.format(n)
+
+            dt = cPickle.load(open(path2data+str(leave)+'_'+str(n)+'.pkl', 'rb'))
 
             (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
 
-            slices = middle_partition(slice(y_tr))
+            slices_tr = middle_partition(slice(y_tr), partitions)
+            slices_te = middle_partition(slice(y_te), partitions)
 
-            for i,s in enumerate(slices):
-                clf.fit(X_tr, y_tr)
+            for i_s,(slice_tr,slice_te) in enumerate(zip(slices_tr, slices_te)):
+                # Slice
+                X_tr_sliced = [X_tr[s] for s in np.asarray(np.concatenate(slice_tr), dtype=np.int64)]
+                y_tr_sliced = [y_tr[s] for s in np.asarray(np.concatenate(slice_tr), dtype=np.int64)]
 
-                y_te_pred = clf.predict(X_te)
+                X_te_sliced = [X_te[s] for s in np.asarray(np.concatenate(slice_te), dtype=np.int64)]
+                y_te_sliced = [y_te[s] for s in np.asarray(np.concatenate(slice_te), dtype=np.int64)]
 
-                print 'Slicing {} Accuracy={}'.format(i, accuracy_score(y_te, y_te_pred))
+                # Train
+                clf.fit(X_tr_sliced[::down_sampling], y_tr_sliced[::down_sampling])
+
+                # Predict
+                y_te_pred = clf.predict(X_te_sliced)
+
+                # Save results
+                cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice': s},
+                             open(path2save + str(leave) + '_' + str(n) + '.pkl', 'wb'))
+
+                # Evaluate
+                acc_frame[leave, i_n, i_s] = acc_per_frame(y_te_sliced, y_te_pred)
+                #acc_video[leave, i_n, i_s] = acc_per_video(y_te_sliced, y_te_pred, slice_te)
+
+                print '         Slice {} AccuracyFrame={}'.format(i_s, acc_frame[leave, i_n, i_s])
+                #print '         Slice {} AccuracyVideo={}'.format(i_s, acc_video[leave, i_n, i_s])
+
+def run_classify(argv):
+    opts, args = getopt.getopt(argv, '')
+    (path2data, path2save, n_clusters, partitions) = \
+        (
+            args[0], args[1], [int(x) for x in args[2].split(',')], [int(x) for x in args[3].split(',')]
+        )
+
+    classify(path2data, path2save, n_clusters, partitions)
+
+if __name__ == '__main__':
+    run_classify(sys.argv[1:])

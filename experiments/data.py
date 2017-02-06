@@ -68,6 +68,10 @@ class FakeEmo:
 
         return data
 
+    def read_vgg(self, path2save):
+
+        pass
+
     def leave_one_out(self, data, n, format='frames'):
         all = range(0,len(data))
         train = list(set(all)-set([n]))
