@@ -77,7 +77,7 @@ class FakeEmo:
         data = [[None for _ in range(self.n_classes)] for _ in range(self.n_persons)]
 
         for p_key in range(1,self.n_persons+1):
-            for t_key in self.target_keys:
+            for t_key in  [f for f in os.listdir(path2load+str(p_key)+'/') if not f.startswith('.')]:
                 print 'person:{} target:{}'.format(str(p_key),t_key)
 
                 files = [f for f in os.listdir(path2load+str(p_key)+'/'+t_key+'/') if f.endswith('.png')]
