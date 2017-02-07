@@ -53,14 +53,22 @@ def bow(path2data, path2save, n_clusters, start_person, stop_person):
     fake_emo_sift = FakeEmo(path2data)
 
     # Load data
-    data = fake_emo_sift.load('femo_sift.pkl')[:2]
+    data = fake_emo_sift.load('femo_sift.pkl')
 
     # Leave one out
     for leave in range(start_person, stop_person):
         print 'Leave {} out'.format(leave)
 
-        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='frames')
-        kmeans, feat_X_tr, feat_X_te = generate_all(X_tr, X_te, n_clusters)
+        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='sequences')
+
+        # Load k-means
+        kmeans = cPickle.load(open('/home/corneanu/data/fake_emotions/kmeans_50_100_200/kmeans_leave_'+str(leave)+'.pkl', 'rb'))
+
+        # Generate representation
+        feat_X_tr = grid_generate_features(X_tr, kmeans)
+        feat_X_te = grid_generate_features(X_te, kmeans)
+
+        #kmeans, feat_X_tr, feat_X_te = generate_all(X_tr, X_te, n_clusters)
 
         print '     Dump representation'
         for km, tr, te in zip(kmeans, feat_X_tr, feat_X_te):
