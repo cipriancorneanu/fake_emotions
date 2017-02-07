@@ -3,6 +3,8 @@ __author__ = 'cipriancorneanu'
 import numpy as np
 import os
 import cPickle
+import scipy.ndimage.imread
+import scipy.misc.imresize
 
 class FakeEmo:
     def __init__(self, path):
@@ -10,7 +12,7 @@ class FakeEmo:
         self.n_classes = 12
         self.path = path
 
-        self.person_keys = ['_'+str(x+1)+'_' for x in np.arange(0,self.n_persons)]
+        self.sift_person_keys = ['_'+str(x+1)+'_' for x in np.arange(0,self.n_persons)]
         self.target_keys = ['act_HAPPY', 'act_SAD', 'act_CONTEMPT', 'act_SURPRISED', 'act_DISGUST', 'act_ANGRY',
                        'fake_HAPPY', 'fake_SAD', 'fake_CONTEMPT', 'fake_SURPRISED', 'fake_DISGUST', 'fake_ANGRY']
 
@@ -26,13 +28,13 @@ class FakeEmo:
         else:
             print 'Nothing to load'
 
-    def read(self, path2save):
+    def read_sift(self, path2save):
         data = [[None for _ in range(self.n_classes)] for _ in range(self.n_persons)]
 
         files = [f for f in os.listdir(path2load)]
 
         # Slice by sequence
-        for p_key in self.person_keys:
+        for p_key in self.sift_person_keys:
             person_seq = [f for f in files if p_key in f]
 
             # Slice by target
@@ -69,8 +71,28 @@ class FakeEmo:
         return data
 
     def read_vgg(self, path2save):
-
         pass
+
+    def read_extracted_faces(self, path2save):
+        data = [[None for _ in range(self.n_classes)] for _ in range(self.n_persons)]
+
+        for p_key in range(0,self.n_persons):
+            for t_key in self.target_keys:
+                print 'person:{} target:{}'.format(str(p_key),t_key)
+
+                files = [f for f in os.listdir(path2load+str(p_key)+'/'+t_key+'/') if f.endswith('.png')]
+
+                ims = np.zeros((len(files),200,200))
+                for i,f in enumerate(files):
+                    im = np.asarray(scipy.ndimage.imread(f,'L'), dtype=np.uint8)
+                    ims[i,:,:] = scipy.misc.imresize(im,(224, 224))
+
+                print('Dumping data to ' + path2save)
+                cPickle.dump(
+                    ims, open(path2save+'femo_extracted_faces_'+str(p_key)+str(self._map_class(t_key))+'.pkl', 'wb'),
+                    cPickle.HIGHEST_PROTOCOL
+                )
+
 
     def leave_one_out(self, data, n, format='frames'):
         all = range(0,len(data))
@@ -106,5 +128,5 @@ if __name__ == '__main__':
     path2save = '/home/corneanu/data/fake_emotions/'
 
     femo = FakeEmo(path2load)
-    femo.load(path2save)
+    femo.read_extracted_faces(path2save)
 

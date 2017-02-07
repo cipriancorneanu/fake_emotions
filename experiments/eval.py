@@ -9,23 +9,22 @@ def acc_per_frame(gt, est):
     return accuracy_score(gt, est)
 
 def acc_per_video(gt, est, slices):
-    gt_, est_ = ([], [])
-    offset = 0
+    gt_, est_, offset = ([], [], 0)
     for slice in slices:
-        slice = np.asarray(slice) - slice[0] + offset
-        offset += len(slice)
+        if len(slice)>0:
+            slice = np.asarray(slice) - slice[0] + offset
+            offset += len(slice)
 
-        # Slice
-        gt_sliced =[gt[s] for s in slice]
-        est_sliced =  [est[s] for s in slice]
+            # Slice
+            gt_sliced =[gt[s] for s in slice]
+            est_sliced =  [est[s] for s in slice]
 
-        # Get class majority in estimation
-        h = np.histogram(est_sliced, bins=range(0,13))[0]
+            # Get class majority in estimation
+            h = np.histogram(est_sliced, bins=range(0,13))[0]
 
-        # Append majority class per video
-        est_.append(np.where(h==max(h))[0][0])
-        gt_.append(gt_sliced[0])
-
+            # Append majority class per video
+            est_.append(np.where(h==max(h))[0][0])
+            gt_.append(gt_sliced[0])
 
     return accuracy_score(gt_, est_)
 
