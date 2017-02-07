@@ -20,23 +20,6 @@ def middle_partition(slices, partitions):
 
     return middle_partitions
 
-def acc_per_frame(gt, est):
-    return accuracy_score(gt, est)
-
-def acc_per_video(gt, est, slices):
-    gt_, est_ = ([], [])
-    for slice in slices:
-        gt_sliced =[gt[s] for s in slice]
-        est_sliced =  [est[s] for s in slice]
-
-        # Get class majority in estimation
-        h = np.histogram(est_sliced, bins=range(0,13))[0]
-
-        est_.append(np.where(h==max(h))[0][0])
-        gt_.append(gt_sliced[0])
-
-    return accuracy_score(gt_, est_)
-
 def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
     # Init classes
     path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
@@ -67,9 +50,6 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
                 X_te_sliced = [X_te[s] for s in np.asarray(np.concatenate(slice_te), dtype=np.int64)]
                 y_te_sliced = [y_te[s] for s in np.asarray(np.concatenate(slice_te), dtype=np.int64)]
 
-                print X_tr.shape
-                print X_te.shape
-
                 # Train
                 clf.fit(X_tr_sliced[::down_sampling], y_tr_sliced[::down_sampling])
 
@@ -78,14 +58,7 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
 
                 # Save results
                 cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice_tr': slice_tr, 'slice_te':slice_te},
-                             open(path2save + str(leave) + '_' + str(n) + '_' + str(i_s) + '.pkl', 'wb'))
-
-                # Evaluate
-                acc_frame[leave, i_n, i_s] = acc_per_frame(y_te_sliced, y_te_pred)
-                #acc_video[leave, i_n, i_s] = acc_per_video(y_te_sliced, y_te_pred, slice_te)
-
-                print '         Slice {} AccuracyFrame={}'.format(i_s, acc_frame[leave, i_n, i_s])
-                #print '         Slice {} AccuracyVideo={}'.format(i_s, acc_video[leave, i_n, i_s])
+                             open(path2save + str(leave) + '_' + str(n) + '_' + str(i_s) + '_' + str(down_sampling) + '.pkl', 'wb'))
 
 def run_classify(argv):
     opts, args = getopt.getopt(argv, '')

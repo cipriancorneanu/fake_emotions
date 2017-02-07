@@ -81,11 +81,12 @@ def bow_video_representation(path2data, path2kmeans, path2save, n_clusters, star
         (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='sequences')
 
         for n in n_clusters:
+            print '     {} clusters'.format(n)
             kmeans = cPickle.load(open(path2kmeans+str(leave)+'_'+str(n)+'.pkl'))['kmeans']
 
             print '     Compute representation'
-            feat_X_tr = grid_generate_features(X_tr, kmeans)
-            feat_X_te = grid_generate_features(X_te, kmeans)
+            feat_X_tr = generate_features(X_tr, kmeans)
+            feat_X_te = generate_features(X_te, kmeans)
 
             print '     Dump representation'
             cPickle.dump({'kmeans': kmeans, 'X_tr': feat_X_tr, 'y_tr': y_tr, 'X_te': feat_X_te, 'y_te': y_te},
