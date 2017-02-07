@@ -69,14 +69,37 @@ def bow(path2data, path2save, n_clusters, start_person, stop_person):
                         open(path2save + str(leave) + '_' + str(km['n_clusters'])+ '.pkl', 'wb'),
                          cPickle.HIGHEST_PROTOCOL)
 
+def bow_video_representation(path2data, path2kmeans, path2save, n_clusters, start_person, stop_person):
+    fake_emo_sift = FakeEmo(path2data)
+
+    # Load data
+    data = fake_emo_sift.load('femo_sift.pkl')
+
+    # Leave one out
+    for leave in range(start_person, stop_person):
+        print 'Leave {} out'.format(leave)
+        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='sequences')
+
+        for n in n_clusters:
+            kmeans = cPickle.load(open(path2kmeans+str(leave)+'_'+str(n)+'.pkl'))['kmeans']
+
+            print '     Compute representation'
+            feat_X_tr = grid_generate_features(X_tr, kmeans)
+            feat_X_te = grid_generate_features(X_te, kmeans)
+
+            print '     Dump representation'
+            cPickle.dump({'kmeans': kmeans, 'X_tr': feat_X_tr, 'y_tr': y_tr, 'X_te': feat_X_te, 'y_te': y_te},
+                        open(path2save + str(leave) + '_' + str(n)+ '.pkl', 'wb'),
+                         cPickle.HIGHEST_PROTOCOL)
+
 def run_bow(argv):
     opts, args = getopt.getopt(argv, '')
-    (path2data, path2save, n_clusters, start, stop) = \
+    (path2data, path2kmeans, path2save, n_clusters, start, stop) = \
         (
-            args[0], args[1], [int(x) for x in args[2].split(',')], int(args[3]), int(args[4])
+            args[0], args[1], args[2], [int(x) for x in args[3].split(',')], int(args[4]), int(args[5])
         )
 
-    bow(path2data, path2save, n_clusters, start, stop)
+    bow(path2data, path2kmeans, path2save, n_clusters, start, stop)
 
 if __name__ == "__main__":
     run_bow(sys.argv[1:])
