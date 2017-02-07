@@ -3,8 +3,8 @@ __author__ = 'cipriancorneanu'
 import numpy as np
 import os
 import cPickle
-import scipy.ndimage.imread
-import scipy.misc.imresize
+from  scipy.ndimage import imread
+from  scipy.misc import imresize
 
 class FakeEmo:
     def __init__(self, path):
@@ -76,23 +76,24 @@ class FakeEmo:
     def read_extracted_faces(self, path2save):
         data = [[None for _ in range(self.n_classes)] for _ in range(self.n_persons)]
 
-        for p_key in range(0,self.n_persons):
+        for p_key in range(1,self.n_persons+1):
             for t_key in self.target_keys:
                 print 'person:{} target:{}'.format(str(p_key),t_key)
 
                 files = [f for f in os.listdir(path2load+str(p_key)+'/'+t_key+'/') if f.endswith('.png')]
+                files.sort()
 
-                ims = np.zeros((len(files),200,200))
+                ims = np.zeros((len(files),224,224), dtype=np.uint8)
                 for i,f in enumerate(files):
-                    im = np.asarray(scipy.ndimage.imread(f,'L'), dtype=np.uint8)
-                    ims[i,:,:] = scipy.misc.imresize(im,(224, 224))
+                    im = imread(path2load+str(p_key)+'/'+t_key+'/'+f,'L')
+                    ims[i,:,:] = np.asarray(imresize(im,(224, 224)), dtype=np.uint8)
 
                 print('Dumping data to ' + path2save)
+                cat, emo = t_key.split('_')
                 cPickle.dump(
-                    ims, open(path2save+'femo_extracted_faces_'+str(p_key)+str(self._map_class(t_key))+'.pkl', 'wb'),
+                    ims, open(path2save+'femo_extracted_faces_'+str(p_key)+'_'+str(self._map_class(cat, emo))+'.pkl', 'wb'),
                     cPickle.HIGHEST_PROTOCOL
                 )
-
 
     def leave_one_out(self, data, n, format='frames'):
         all = range(0,len(data))
@@ -124,8 +125,8 @@ class FakeEmo:
         return (X,y)
 
 if __name__ == '__main__':
-    path2load = '/data/hupba2/Derived/FaceSIFTs/'
-    path2save = '/home/corneanu/data/fake_emotions/'
+    path2load = '/data/hupba2/Datasets/FakefaceDataProc/Extracted_faces/'
+    path2save = '/home/corneanu/data/fake_emotions/extracted_faces/'
 
     femo = FakeEmo(path2load)
     femo.read_extracted_faces(path2save)
