@@ -71,6 +71,7 @@ class FakeEmo:
         return data
 
     def read_vgg(self, path2save):
+
         pass
 
     def read_extracted_faces(self, path2save):

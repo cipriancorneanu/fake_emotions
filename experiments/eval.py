@@ -28,7 +28,7 @@ def acc_per_video(gt, est, slices):
 
     return accuracy_score(gt_, est_)
 
-if __name__ == '__main__':
+def eval_frame():
     path2data = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/sift/'
 
     n_persons, n_clusters, n_partitions = (54,3,4)
@@ -50,3 +50,21 @@ if __name__ == '__main__':
         print 'Frame rate {}:1'.format(fr)
         print np.mean(acc_frame, axis=0)
         print np.mean(acc_video, axis=0)
+
+def eval_video(path2data):
+    n_persons, n_clusters = (54,3)
+    results = np.zeros((n_persons, n_clusters))
+
+    for leave in range(0,n_persons):
+        for i_n, n in enumerate([50,100,200]):
+            dt = cPickle.load(open(path2data+str(leave)+'_'+str(n)+'.pkl', 'rb'))
+
+            accuracy_score(dt['gt'], dt['est'])
+
+            # Evaluate
+            results[leave, i_n] = acc_per_frame(dt['gt'], dt['est'])
+
+    print np.mean(results, axis=0)
+
+if __name__ == '__main__':
+    eval_video('/Users/cipriancorneanu/Research/data/fake_emotions/sift/results_bow_per_video_2c/')

@@ -20,17 +20,25 @@ def middle_partition(slices, partitions):
 
     return middle_partitions
 
-def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
-    # Init classes
-    path = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
-    femo = FakeEmo(path)
+def change_classes(X, y, mode='12classes'):
+    if mode == '2classes':
+        return (X, [0 if x < 6 else 1 for x in y])
+    elif mode == '6classes_true':
+        return  zip(*[ (v_X, v_y) for (v_X, v_y) in zip(X, y) if v_y<6 ])
+    elif mode == '6classes_fake':
+        return  zip(*[ (v_X, v_y-6) for (v_X, v_y) in zip(X, y) if v_y>=6 ])
+    elif mode == '12classes':
+        return (X, y)
+
+def classify_frame(path2data, path2save, n_clusters, partitions, down_sampling=1, mode='12classes', save=False):
+    n_persons = 54
     clf = LinearSVC()
 
     # Leave-one-out
-    acc_frame = np.zeros((femo.n_persons, len(n_clusters), len(partitions)))
-    acc_video = np.zeros((femo.n_persons, len(n_clusters), len(partitions)))
+    acc_frame = np.zeros((n_persons, len(n_clusters), len(partitions)))
+    acc_video = np.zeros((n_persons, len(n_clusters), len(partitions)))
 
-    for leave in range(0,femo.n_persons):
+    for leave in range(0,n_persons):
         print 'Leave {}'.format(leave)
         for i_n, n in enumerate(n_clusters):
             print '     {} clusters'.format(n)
@@ -39,6 +47,11 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
 
             (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
 
+            # Change classes
+            (X_tr,y_tr) = change_classes(X_tr, y_tr, mode)
+            (X_te,y_te) = change_classes(X_te, y_te, mode)
+
+            # Slice
             slices_tr = middle_partition(slice(y_tr), partitions)
             slices_te = middle_partition(slice(y_te), partitions)
 
@@ -57,8 +70,44 @@ def classify(path2data, path2save, n_clusters, partitions, down_sampling=1):
                 y_te_pred = clf.predict(X_te_sliced)
 
                 # Save results
-                cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice_tr': slice_tr, 'slice_te':slice_te},
-                             open(path2save + str(leave) + '_' + str(n) + '_' + str(i_s) + '_' + str(down_sampling) + '.pkl', 'wb'))
+                if save:
+                    cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice_tr': slice_tr, 'slice_te':slice_te},
+                                 open(path2save + str(leave) + '_' + str(n) + '_' + str(i_s) + '_' + str(down_sampling) + '.pkl', 'wb'))
+
+def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=False):
+    n_persons = 54
+    clf = LinearSVC()
+
+    print mode
+    results = np.zeros((n_persons, len(n_clusters)))
+
+    for leave in range(0, n_persons):
+        for i_n, n in enumerate(n_clusters):
+
+            dt = cPickle.load(open(path2data+str(leave)+'_'+str(n)+'.pkl', 'rb'))
+
+            (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
+
+            # Change classes
+            (X_tr,y_tr) = change_classes(X_tr, y_tr, mode)
+            (X_te,y_te) = change_classes(X_te, y_te, mode)
+
+            # Train
+            clf.fit(X_tr, y_tr)
+
+            # Predict
+            y_te_pred = clf.predict(X_te)
+
+            # Eval
+            results[leave, i_n] = accuracy_score(y_te, y_te_pred)
+
+            # Save results
+            if save:
+                cPickle.dump({'clf':clf, 'gt': y_te, 'est': y_te_pred},
+                             open(path2save + str(leave) + '_' + str(n) + '.pkl', 'wb'))
+
+    print np.mean(results, axis=0)
+
 
 def run_classify(argv):
     opts, args = getopt.getopt(argv, '')
@@ -67,14 +116,51 @@ def run_classify(argv):
             args[0], args[1], [int(x) for x in args[2].split(',')], [float(x) for x in args[3].split(',')], int(args[4])
         )
 
-    classify(path2data, path2save, n_clusters, partitions, ds)
+    classify_frame(path2data, path2save, n_clusters, partitions, ds)
 
 if __name__ == '__main__':
-    classify(
-        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
-        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
-        [50,100,200],
-        [0.2,0.3,0.5],
-        10
+    path_sift =  '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
+
+    classify_sequence(
+        path_sift + 'bow_per_video/',
+        path_sift + 'results_bow_per_video_12c/',
+        [50,100,200], '12classes'
     )
+    classify_sequence(
+        path_sift + 'bow_per_video/',
+        path_sift + 'results_bow_per_video_12c/',
+        [50,100,200], '6classes_true'
+    )
+    classify_sequence(
+        path_sift + 'bow_per_video/',
+        path_sift + 'results_bow_per_video_12c/',
+        [50,100,200], '6classes_fake'
+    )
+    classify_sequence(
+        path_sift + 'bow_per_video/',
+        path_sift + 'results_bow_per_video_12c/',
+        [50,100,200], '2classes'
+    )
+
+    classify_frame(
+        path_sift + 'bow_per_frame/',
+        path_sift + '',
+        [50,100,200], [0,0.2,0.3,0.5], '12classes'
+    )
+    classify_frame(
+        path_sift + 'bow_per_frame/',
+        path_sift + '',
+        [50,100,200], [0,0.2,0.3,0.5], '6classes_true'
+    )
+    classify_frame(
+        path_sift + 'bow_per_frame/',
+        path_sift + '',
+        [50,100,200], [0,0.2,0.3,0.5], '6classes_fake'
+    )
+    classify_frame(
+        path_sift + 'bow_per_frame/',
+        path_sift + '',
+        [50,100,200], [0,0.2,0.3,0.5], '2classes'
+    )
+
     #run_classify(sys.argv[1:])
