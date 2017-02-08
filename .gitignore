@@ -1,3 +1,3 @@
 preprocess/data
 preprocess/reader/read.m
-preprocess/experiments/*.pyc
+experiments/*.pyc
