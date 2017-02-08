@@ -37,14 +37,16 @@ if __name__ == '__main__':
     acc_frame = np.zeros((n_persons, n_clusters, n_partitions))
     acc_video = np.zeros((n_persons, n_clusters, n_partitions))
 
-    for leave in range(0,n_persons):
-        for i_n, n in enumerate([50,100,200]):
-            for i_s in range(0,n_partitions):
-                dt = cPickle.load(open(path2data+str(leave)+'_'+str(n)+'_'+str(i_s)+'_20'+'.pkl', 'rb'))
+    for fr in [5,20]:
+        for leave in range(0,n_persons):
+            for i_n, n in enumerate([50,100,200]):
+                for i_s in range(0,n_partitions):
+                    dt = cPickle.load(open(path2data+str(leave)+'_'+str(n)+'_'+str(i_s)+'_'+ str(fr)+'.pkl', 'rb'))
 
-                # Evaluate
-                acc_frame[leave, i_n, i_s] = acc_per_frame(dt['gt'], dt['est'])
-                acc_video[leave, i_n, i_s] = acc_per_video(dt['gt'], dt['est'], dt['slice_te'])
+                    # Evaluate
+                    acc_frame[leave, i_n, i_s] = acc_per_frame(dt['gt'], dt['est'])
+                    acc_video[leave, i_n, i_s] = acc_per_video(dt['gt'], dt['est'], dt['slice_te'])
 
-    print np.mean(acc_frame, axis=0)
-    print np.mean(acc_video, axis=0)
+        print 'Frame rate {}:1'.format(fr)
+        print np.mean(acc_frame, axis=0)
+        print np.mean(acc_video, axis=0)
