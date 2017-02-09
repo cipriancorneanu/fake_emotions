@@ -59,7 +59,7 @@ def bow(path2data, path2save, n_clusters, start_person, stop_person):
     for leave in range(start_person, stop_person):
         print 'Leave {} out'.format(leave)
 
-        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='sequences')
+        (X_tr, y_tr), (X_te, y_te) = fake_emo_sift.leave_one_out(data, leave, format='frames')
 
         kmeans, feat_X_tr, feat_X_te = generate_all(X_tr, X_te, n_clusters)
 
@@ -95,12 +95,12 @@ def bow_video_representation(path2data, path2kmeans, path2save, n_clusters, star
 
 def run_bow(argv):
     opts, args = getopt.getopt(argv, '')
-    (path2data, path2kmeans, path2save, n_clusters, start, stop) = \
+    (path2data, path2save, n_clusters, start, stop) = \
         (
-            args[0], args[1], args[2], [int(x) for x in args[3].split(',')], int(args[4]), int(args[5])
+            args[0], args[1], [int(x) for x in args[2].split(',')], int(args[3]), int(args[4])
         )
 
-    bow(path2data, path2kmeans, path2save, n_clusters, start, stop)
+    bow(path2data, path2save, n_clusters, start, stop)
 
 if __name__ == "__main__":
     run_bow(sys.argv[1:])

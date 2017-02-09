@@ -28,9 +28,7 @@ def acc_per_video(gt, est, slices):
 
     return accuracy_score(gt_, est_)
 
-def eval_frame():
-    path2data = '/Users/cipriancorneanu/Research/data/fake_emotions/sift/sift/'
-
+def eval_frame(path2data):
     n_persons, n_clusters, n_partitions = (54,3,4)
 
     # Leave-one-out

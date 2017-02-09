@@ -2,7 +2,7 @@ __author__ = 'cipriancorneanu'
 
 import os
 
-path = '/data/hupba2/Datasets/FakefaceDataProc/Extracted_faces'
+path = '/data/hupba2/Datasets/FakefaceDataProc/Extracted_faces/'
 
 for dir in os.listdir(path):
     for emo in os.listdir(os.path.join(path,dir)):

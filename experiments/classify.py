@@ -35,8 +35,7 @@ def classify_frame(path2data, path2save, n_clusters, partitions, down_sampling=1
     clf = LinearSVC()
 
     # Leave-one-out
-    acc_frame = np.zeros((n_persons, len(n_clusters), len(partitions)))
-    acc_video = np.zeros((n_persons, len(n_clusters), len(partitions)))
+    results = np.zeros((n_persons, len(n_clusters), len(partitions)))
 
     for leave in range(0,n_persons):
         print 'Leave {}'.format(leave)
@@ -69,10 +68,16 @@ def classify_frame(path2data, path2save, n_clusters, partitions, down_sampling=1
                 # Predict
                 y_te_pred = clf.predict(X_te_sliced)
 
+                # Eval
+                results[leave, i_n, i_s] = accuracy_score(y_te, y_te_pred)
+
                 # Save results
                 if save:
                     cPickle.dump({'clf':clf, 'gt': y_te_sliced, 'est': y_te_pred, 'slice_tr': slice_tr, 'slice_te':slice_te},
                                  open(path2save + str(leave) + '_' + str(n) + '_' + str(i_s) + '_' + str(down_sampling) + '.pkl', 'wb'))
+
+    print np.mean(results, axis=0)
+
 
 def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=False):
     n_persons = 54
@@ -121,6 +126,7 @@ def run_classify(argv):
 if __name__ == '__main__':
     path_sift =  '/Users/cipriancorneanu/Research/data/fake_emotions/sift/'
 
+    print 'Sequence classification'
     classify_sequence(
         path_sift + 'bow_per_video/',
         path_sift + 'results_bow_per_video_12c/',
@@ -140,27 +146,6 @@ if __name__ == '__main__':
         path_sift + 'bow_per_video/',
         path_sift + 'results_bow_per_video_12c/',
         [50,100,200], '2classes'
-    )
-
-    classify_frame(
-        path_sift + 'bow_per_frame/',
-        path_sift + '',
-        [50,100,200], [0,0.2,0.3,0.5], '12classes'
-    )
-    classify_frame(
-        path_sift + 'bow_per_frame/',
-        path_sift + '',
-        [50,100,200], [0,0.2,0.3,0.5], '6classes_true'
-    )
-    classify_frame(
-        path_sift + 'bow_per_frame/',
-        path_sift + '',
-        [50,100,200], [0,0.2,0.3,0.5], '6classes_fake'
-    )
-    classify_frame(
-        path_sift + 'bow_per_frame/',
-        path_sift + '',
-        [50,100,200], [0,0.2,0.3,0.5], '2classes'
     )
 
     #run_classify(sys.argv[1:])
