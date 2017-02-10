@@ -28,7 +28,7 @@ class FakeEmo:
         else:
             print 'Nothing to load'
 
-    def read_sift(self, path2save):
+    def read(self, path2load, path2save, fname):
         data = [[None for _ in range(self.n_classes)] for _ in range(self.n_persons)]
 
         files = [f for f in os.listdir(path2load)]
@@ -56,7 +56,7 @@ class FakeEmo:
                         target = self.map_class(category,fe)
 
                         # Load data
-                        fdata = cPickle.load(open(path2load+f, 'rb'))
+                        fdata = cPickle.load(open(path2load+fname, 'rb'))
                         seq[frame] = np.asarray(fdata, dtype=np.int16)
 
                     data[person][target] = seq
@@ -70,11 +70,7 @@ class FakeEmo:
 
         return data
 
-    def read_vgg(self, path2save):
-
-        pass
-
-    def read_extracted_faces(self, path2save):
+    def read_extracted_faces(self, path2load, path2save):
         data = [[None for _ in range(self.n_classes)] for _ in range(self.n_persons)]
 
         for p_key in range(1,self.n_persons+1):
@@ -95,6 +91,19 @@ class FakeEmo:
                     ims, open(path2save+'femo_extracted_faces_'+str(p_key)+'_'+str(self._map_class(cat, emo))+'.pkl', 'wb'),
                     cPickle.HIGHEST_PROTOCOL
                 )
+
+    def format_feat_fnames(self, path):
+        fnames = [f for f in os.listdir(path) if f.endswith('.pkl')]
+        roots, persons, cats, emos = zip(*[f.split('.')[0].split('_') for f in fnames])
+        roots = [r.split('.')[0][5:] if r.startswith('frame') else (r.split('[')[0] if '[' in r else r ) for r in roots]
+        frames = ['0'*(5 - len(r))+r for r in roots ]
+
+        # Change names
+        nfnames = [ fnm+'_'+prs+'_'+str(self._map_class(cat, emo))+'.pkl' for (fnm, prs, emo, cat) in zip(frames, persons, emos, cats)]
+
+        fnames  = [f.replace(" ", "\ ") for f in os.listdir(path) if f.endswith('.pkl')]
+        for fn, nfn in zip(fnames, nfnames):
+            os.system('mv '+path+fn+' '+path+nfn)
 
     def leave_one_out(self, data, n, format='frames'):
         all = range(0,len(data))
@@ -126,9 +135,8 @@ class FakeEmo:
         return (X,y)
 
 if __name__ == '__main__':
-    path2load = '/data/hupba2/Datasets/FakefaceDataProc/Extracted_faces/'
+    path2load = '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/VGGOrigFC7Fake/'
     path2save = '/home/corneanu/data/fake_emotions/extracted_faces/'
 
     femo = FakeEmo(path2load)
-    femo.read_extracted_faces(path2save)
-
+    femo.format_feat_fnames(path2load)

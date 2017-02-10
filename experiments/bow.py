@@ -5,7 +5,7 @@ import numpy as np
 import cPickle
 from data import FakeEmo
 import getopt, sys
-from classify import middle_partition
+from classify import middle_partition, slice
 
 def generate_kmeans(X, n):
     # Pool 10% of all data
