@@ -34,7 +34,7 @@ def generate_features(X, kmeans):
             feat[w] += 1
 
     # l1-normalize
-    features = [f/np.sum(f) for f in features]
+    #features = [f/np.sum(f) for f in features]
 
     return features
 
@@ -75,12 +75,12 @@ def bow_frame_representation(path2data, path2save, n_clusters, start_person, sto
                         open(path2save + str(leave) + '_' + str(km['n_clusters'])+ '.pkl', 'wb'),
                          cPickle.HIGHEST_PROTOCOL)
 
-def bow_video_representation(path2data, path2kmeans, path2save, n_clusters, start_person, stop_person):
+def bow_video_representation(path2data, fname, path2kmeans, path2save, n_clusters, start_person, stop_person):
     fake_emo_sift = FakeEmo(path2data)
     partitions = [0, 0.2, 0.3, 0.5]
 
     # Load data
-    data = fake_emo_sift.load('femo_sift.pkl')
+    data = fake_emo_sift.load(fname)
 
     # Leave one out
     for leave in range(start_person, stop_person):
@@ -119,18 +119,18 @@ def bow_video_representation(path2data, path2kmeans, path2save, n_clusters, star
 
 def run_bow_video(argv):
     opts, args = getopt.getopt(argv, '')
-    (path2data, path2kmeans, path2save, n_clusters, start, stop) = \
+    (path2data, fname, path2kmeans, path2save, n_clusters, start, stop) = \
         (
-            args[0], args[1],  args[2], [int(x) for x in args[3].split(',')], int(args[4]), int(args[5])
+            args[0], args[1],  args[2], args[3], [int(x) for x in args[4].split(',')], int(args[5]), int(args[6])
         )
-    bow_video_representation(path2data, path2kmeans, path2save, n_clusters, start, stop)
+    bow_video_representation(path2data, fname, path2kmeans, path2save, n_clusters, start, stop)
 
 
 def run_bow_frame(argv):
     opts, args = getopt.getopt(argv, '')
     (path2data, path2save, n_clusters, start, stop) = \
         (
-            args[0], args[1], [int(x) for x in args[2].split(',')], int(args[3]), int(args[4])
+            args[0], args[1], args[2], [int(x) for x in args[3].split(',')], int(args[4]), int(args[5])
         )
     bow_frame_representation(path2data, path2save, n_clusters, start, stop)
 

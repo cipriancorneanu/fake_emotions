@@ -79,8 +79,8 @@ def classify_frame(path2data, path2save, n_clusters, partitions, down_sampling=1
     print np.mean(results, axis=0)
 
 
-def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=False):
-    n_persons = 54
+def classify_sequence(path2data, path2save, n_clusters, partitions, mode='12classes', save=False):
+    n_persons, n_partitions = (54, 4)
     clf = LinearSVC()
 
     print mode
@@ -88,28 +88,32 @@ def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=F
 
     for leave in range(0, n_persons):
         for i_n, n in enumerate(n_clusters):
+            for i_p,(slice_tr,slice_te) in range(0,n_partitions):
+                dt = cPickle.load(open(path2data+str(leave)+'_'+ str(i_p)+'_'+ str(n)+'.pkl', 'rb'))
 
-            dt = cPickle.load(open(path2data+str(leave)+'_'+str(n)+'.pkl', 'rb'))
+                (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
 
-            (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
+                # Normalize
+                X_tr = [x/np.sum(x) for x in X_tr]
+                X_te = [x/np.sum(x) for x in X_te]
 
-            # Change classes
-            (X_tr,y_tr) = change_classes(X_tr, y_tr, mode)
-            (X_te,y_te) = change_classes(X_te, y_te, mode)
+                # Change classes
+                (X_tr,y_tr) = change_classes(X_tr, y_tr, mode)
+                (X_te,y_te) = change_classes(X_te, y_te, mode)
 
-            # Train
-            clf.fit(X_tr, y_tr)
+                # Train
+                clf.fit(X_tr, y_tr)
 
-            # Predict
-            y_te_pred = clf.predict(X_te)
+                # Predict
+                y_te_pred = clf.predict(X_te)
 
-            # Eval
-            results[leave, i_n] = accuracy_score(y_te, y_te_pred)
+                # Eval
+                results[leave, i_n] = accuracy_score(y_te, y_te_pred)
 
-            # Save results
-            if save:
-                cPickle.dump({'clf':clf, 'gt': y_te, 'est': y_te_pred},
-                             open(path2save + str(leave) + '_' + str(n) + '.pkl', 'wb'))
+                # Save results
+                if save:
+                    cPickle.dump({'clf':clf, 'gt': y_te, 'est': y_te_pred},
+                                 open(path2save + str(leave)+'_'+ str(i_p)+'_'+ str(n) + '.pkl', 'wb'))
 
     print np.mean(results, axis=0)
 
