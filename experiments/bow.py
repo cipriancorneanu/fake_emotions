@@ -25,7 +25,7 @@ def grid_generate_kmeans(X, n_clusters):
     return kmeans
 
 def generate_features(X, kmeans):
-    features = np.zeros((len(X), kmeans.n_clusters), dtype = np.int16)
+    features = np.zeros((len(X), kmeans.n_clusters), dtype = np.float64)
 
     for i, (frame,feat) in enumerate(zip(X, features)):
         words = kmeans.predict(frame)
