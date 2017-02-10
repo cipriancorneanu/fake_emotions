@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from scipy.misc import imresize
-from experiments.data import FakeEmo
 import getopt
 import sys
 
@@ -51,38 +50,40 @@ def apply(model, o_ims):
     return preds
 
 def extract_geometry(path2model, path2faces, path2save, start_person, stop_person):
-    femo = FakeEmo('')
-    data = [[None for x in range(0,femo.n_classes)] for y in range(0,femo.n_persons)]
+    n_classes, n_persons = (12, 54)
+    data = [x for x in range(0,n_classes)]
 
     model = cPickle.load(open(path2model+'continuous_300w.pkl', 'rb'))
 
     for p_key in range(start_person, stop_person):
         predictions = []
-        for t_key in range(0,femo.n_classes):
+        for t_key in range(0,n_classes):
             print 'person:{} target:{}'.format(str(p_key),t_key)
 
             fname = path2faces+'femo_extracted_faces_'+str(p_key)+'_'+str(t_key)+'.pkl'
 
             if os.path.exists(fname):
                 ims =  cPickle.load(open(fname, 'rb'))
-                preds = apply(path2model, ims[:2])
-                data[p_key-1][t_key] = preds
+                preds = apply(model, ims)
+                data[t_key] = preds
 
                 # Visualize
-                for i,(p, im) in enumerate(zip(preds, ims[:2])):
+                '''
+                for i,(p, im) in enumerate(zip(preds, ims)):
                     # Show
                     fig, (ax) = plt.subplots(1, 1)
                     ax.imshow(np.squeeze(im))
                     ax.scatter(p.reshape(68,-1)[:,1], p.reshape(68,-1)[:,0])
 
                     plt.savefig('./prediction'+str(p_key)+'_'+str(t_key)+'.png')
+                '''
             else:
                 print 'Nothing to load'
-    print('Dumping data to ' + path2save)
 
-    cPickle.dump(
-        ims, open(path2save+'femo_geom_csdm'+str(start_person)+'_'+str(stop_person)+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL
-    )
+        print('Dumping data to ' + path2save)
+        cPickle.dump(
+            data, open(path2save+'femo_geom_csdm_'+str(p_key)+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL
+        )
 
 def run_extract_geometry(argv):
     opts, args = getopt.getopt(argv, '')
@@ -94,4 +95,5 @@ def run_extract_geometry(argv):
     extract_geometry(path2model, path2faces, path2save, start, stop)
 
 if __name__ == '__main__':
+    dt = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/femo_geom_csdm3_4.pkl', 'rb'))
     run_extract_geometry(sys.argv[1:])
