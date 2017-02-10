@@ -45,18 +45,18 @@ class FakeEmo:
 
                 if target_seq:
                     # Extract frame numbers and compute last and use as length
-                    last_frame = max([ int(f.split('.')[0].split('_')[0][3:]) for f in target_seq])
+                    last_frame = max([ int(f.split('.')[0].split('_')[0]) for f in target_seq])
                     seq = [None]*last_frame
 
                     # Read sequence
                     for i,f in enumerate(target_seq):
                         # Parse fname
                         tokens = f.split('.')[0].split('_')
-                        category, fe, person, frame = (tokens[2], tokens[3], int(tokens[1])-1, int(tokens[0][3:])-1)
-                        target = self.map_class(category,fe)
+                        category, fe, person, frame = (tokens[2], tokens[3], int(tokens[1])-1, int(tokens[0])-1)
+                        target = self._map_class(category,fe)
 
                         # Load data
-                        fdata = cPickle.load(open(path2load+fname, 'rb'))
+                        fdata = cPickle.load(open(path2load+f, 'rb'))
                         seq[frame] = np.asarray(fdata, dtype=np.int16)
 
                     data[person][target] = seq
@@ -66,7 +66,7 @@ class FakeEmo:
         print('Dumping data to ' + path2save)
 
         for i, part in enumerate([range(0,9), range(9, 18), range(18, 27), range(27,36), range(36, 45), range(45, 54)]):
-            cPickle.dump([data[x] for x in part], open(path2save+'femo_sift_'+str(i)+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
+            cPickle.dump([data[x] for x in part], open(path2save+fname+str(i)+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
 
         return data
 
@@ -99,7 +99,7 @@ class FakeEmo:
         frames = ['0'*(5 - len(r))+r for r in roots ]
 
         # Change names
-        nfnames = [ fnm+'_'+prs+'_'+str(self._map_class(cat, emo))+'.pkl' for (fnm, prs, emo, cat) in zip(frames, persons, emos, cats)]
+        nfnames = [ fnm+'_'+prs+'_'+cat+'_'+emo+'.pkl' for (fnm, prs, emo, cat) in zip(frames, persons, emos, cats)]
 
         fnames  = [f.replace(" ", "\ ") for f in os.listdir(path) if f.endswith('.pkl')]
         for fn, nfn in zip(fnames, nfnames):
@@ -139,4 +139,6 @@ if __name__ == '__main__':
     path2save = '/home/corneanu/data/fake_emotions/extracted_faces/'
 
     femo = FakeEmo(path2load)
-    femo.format_feat_fnames(path2load)
+
+    #femo.format_feat_fnames(path2load)
+    femo.read(path2load, path2save, 'femo_vgg_fc7_')
