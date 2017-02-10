@@ -6,6 +6,7 @@ import cPickle
 from data import FakeEmo
 import getopt, sys
 from classify import middle_partition, slice
+import os
 
 def generate_kmeans(X, n):
     # Pool 10% of all data
@@ -28,8 +29,12 @@ def generate_features(X, kmeans):
 
     for i, (frame,feat) in enumerate(zip(X, features)):
         words = kmeans.predict(frame)
+        # sum pooling
         for w in words:
             feat[w] += 1
+
+    # l1-normalize
+    features = [f/np.sum(f) for f in features]
 
     return features
 
@@ -96,7 +101,12 @@ def bow_video_representation(path2data, path2kmeans, path2save, n_clusters, star
 
             for n in n_clusters:
                 print '     {} clusters'.format(n)
-                kmeans = cPickle.load(open(path2kmeans+str(leave)+'_'+str(n)+'.pkl'))['kmeans']
+                if os.path.exists(path2kmeans+str(leave)+'_'+str(n)+'.pkl'):
+                    print '     Load kmeans'
+                    kmeans = cPickle.load(open(path2kmeans+str(leave)+'_'+str(n)+'.pkl'))['kmeans']
+                else:
+                    print '     Compute kmeans'
+                    kmeans = grid_generate_kmeans(X_tr, n_clusters)
 
                 print '     Compute representation'
                 feat_X_tr = generate_features(X_tr_sliced, kmeans)
