@@ -34,7 +34,7 @@ def generate_features(X, kmeans):
             feat[w] += 1
 
     # l1-normalize
-    #features = [f/np.sum(f) for f in features]
+    features = [f/np.sum(f) for f in features]
 
     return features
 
@@ -92,6 +92,7 @@ def bow_video_representation(path2data, fname, path2kmeans, path2save, n_cluster
         slices_te = middle_partition(slice(y_te), partitions)
 
         for i_s,(slice_tr,slice_te) in enumerate(zip(slices_tr, slices_te)):
+            print '     Slicing {}'.format(i_s)
             # Slice
             X_tr_sliced = [X_tr[s] for s in np.asarray(np.concatenate(slice_tr), dtype=np.int64)]
             y_tr_sliced = [y_tr[s] for s in np.asarray(np.concatenate(slice_tr), dtype=np.int64)]
@@ -102,17 +103,17 @@ def bow_video_representation(path2data, fname, path2kmeans, path2save, n_cluster
             for n in n_clusters:
                 print '     {} clusters'.format(n)
                 if os.path.exists(path2kmeans+str(leave)+'_'+str(n)+'.pkl'):
-                    print '     Load kmeans'
+                    print '         Load kmeans'
                     kmeans = cPickle.load(open(path2kmeans+str(leave)+'_'+str(n)+'.pkl'))['kmeans']
                 else:
-                    print '     Compute kmeans'
+                    print '         Compute kmeans'
                     kmeans = grid_generate_kmeans(X_tr, n_clusters)
 
-                print '     Compute representation'
+                print '         Compute representation'
                 feat_X_tr = generate_features(X_tr_sliced, kmeans)
                 feat_X_te = generate_features(X_te_sliced, kmeans)
 
-                print '     Dump representation'
+                print '         Dump representation'
                 cPickle.dump({'kmeans': kmeans, 'X_tr': feat_X_tr, 'y_tr': y_tr_sliced, 'X_te': feat_X_te, 'y_te': y_te_sliced},
                             open(path2save + str(leave) + '_' + str(i_s) + '_' + str(n)+ '.pkl', 'wb'),
                              cPickle.HIGHEST_PROTOCOL)

@@ -79,7 +79,7 @@ def classify_frame(path2data, path2save, n_clusters, partitions, down_sampling=1
     print np.mean(results, axis=0)
 
 
-def classify_sequence(path2data, path2save, n_clusters, partitions, mode='12classes', save=False):
+def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=False):
     n_persons, n_partitions = (54, 4)
     clf = LinearSVC()
 
