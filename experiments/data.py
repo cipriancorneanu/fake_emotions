@@ -64,10 +64,12 @@ class FakeEmo:
                     print 'Target sequence empty'
 
         print('Dumping data to ' + path2save)
+        cPickle.dump(data, open(path2save+fname+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
 
+        '''
         for i, part in enumerate([range(0,9), range(9, 18), range(18, 27), range(27,36), range(36, 45), range(45, 54)]):
             cPickle.dump([data[x] for x in part], open(path2save+fname+str(i)+'.pkl', 'wb'), cPickle.HIGHEST_PROTOCOL)
-
+        '''
         return data
 
     def read_extracted_faces(self, path2load, path2save):
@@ -112,8 +114,11 @@ class FakeEmo:
 
         if format=='frames':
             return (self.prepare_frames([data[x] for x in train]), self.prepare_frames([data[x] for x in test]))
-        elif format=='sequences':
-            return (self.prepare_sequences([data[x] for x in train]), self.prepare_sequences([data[x] for x in test]))
+        elif format=='sift_sequences':
+            return (self.prepare_sequences([data[x] for x in train]), self.prepare_sequences([data[x] for x in test], format))
+        elif format=='vgg_sequences':
+            return (self.prepare_sequences([data[x] for x in train], format), self.prepare_sequences([data[x] for x in test], format))
+
 
     def prepare_frames(self, data):
         X, y = ([],[])
@@ -124,14 +129,17 @@ class FakeEmo:
                                 X.append(frame)
         return (X,y)
 
-    def prepare_sequences(self, data):
+    def prepare_sequences(self, data, format='sift_sequences'):
         X, y = ([],[])
         for i_pers,pers in enumerate([x for x in data if x is not None]):
                 for i_emo,emo in enumerate([x for x in pers]):
                     if emo is not None:
                         emo = [x for x in emo if x is not None]
                         y.append(i_emo)
-                        X.append(np.concatenate(emo))
+                        if format=='sift_sequences':
+                            X.append(np.concatenate(emo))
+                        elif format=='vgg_sequences':
+                            X.append(np.asarray(emo))
         return (X,y)
 
 if __name__ == '__main__':

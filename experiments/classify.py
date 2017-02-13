@@ -8,6 +8,10 @@ import numpy as np
 import getopt
 import sys
 
+def slice_sequences(data):
+    lengths = [len(d) for d in data]
+    return [range(0,l) for l in lengths]
+
 def slice(labels):
     borders = [i+1 for i,(x, x_) in enumerate(zip(labels[:-1], labels[1:])) if x!=x_]
     return [range(bmin, bmax) for bmin, bmax in zip([0]+borders, borders + [len(labels)])]
@@ -86,16 +90,14 @@ def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=F
     print mode
     results = np.zeros((n_persons, len(n_clusters)))
 
-    for leave in range(0, n_persons):
+    for leave in range(8, 9):#n_persons):
         for i_n, n in enumerate(n_clusters):
-            for i_p,(slice_tr,slice_te) in range(0,n_partitions):
+            for i_p in range(0,n_partitions):
+                print leave, i_n, i_p
+
                 dt = cPickle.load(open(path2data+str(leave)+'_'+ str(i_p)+'_'+ str(n)+'.pkl', 'rb'))
 
                 (X_tr, X_te, y_tr, y_te)= (dt['X_tr'], dt['X_te'],dt['y_tr'], dt['y_te'])
-
-                # Normalize
-                X_tr = [x/np.sum(x) for x in X_tr]
-                X_te = [x/np.sum(x) for x in X_te]
 
                 # Change classes
                 (X_tr,y_tr) = change_classes(X_tr, y_tr, mode)
