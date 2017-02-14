@@ -88,7 +88,7 @@ def bow_video_representation(path2data, fname, path2kmeans, path2save, n_cluster
     partitions = [0, 0.2, 0.3, 0.5]
 
     # Load data
-    data = fake_emo_sift.load(fname)[:3]
+    data = fake_emo_sift.load(fname)
 
     # Leave one out
     for leave in range(start_person, stop_person):
@@ -143,11 +143,7 @@ def run_bow_frame(argv):
 
 
 if __name__ == "__main__":
-    dt50 = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/sift/0_0_50.pkl', 'rb'))
-    dt100 = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/sift/0_0_100.pkl', 'rb'))
-
     #run_bow_video(sys.argv[1:])
-
     bow_video_representation(
         '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/',
         'femo_vgg_fc7.pkl',
