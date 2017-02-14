@@ -28,7 +28,7 @@ def grid_load_kmeans(path, leave, n_clusters):
     kmeans = [None]*len(n_clusters)
     for i,n in enumerate(n_clusters):
         print'          {} clusters'.format(n)
-        kmeans[i] = {'n_clusters': n, 'kmeans': cPickle.load(open(path+str(leave)+str(n)+'.pkl', 'rb'))['kmeans']}
+        kmeans[i] = {'n_clusters': n, 'kmeans': cPickle.load(open(path+str(leave)+'_'+str(n)+'.pkl', 'rb'))['kmeans']}
 
     return kmeans
 
@@ -112,8 +112,8 @@ def bow_video_representation(path2data, fname, path2kmeans, path2save, n_cluster
                 kmeans = grid_load_kmeans(path2kmeans, leave, n_clusters)
 
                 print '     Compute representation'
-                feat_X_tr = grid_generate_features(X_tr, kmeans)
-                feat_X_te = grid_generate_features(X_te, kmeans)
+                feat_X_tr = grid_generate_features([np.concatenate(x) for x in X_tr], kmeans)
+                feat_X_te = grid_generate_features([np.concatenate(x) for x in X_te], kmeans)
             else:
                 print '         Compute kmeans and representation'
                 kmeans, feat_X_tr, feat_X_te = generate_all(X_tr_sliced, X_te_sliced, n_clusters)
@@ -143,11 +143,15 @@ def run_bow_frame(argv):
 
 
 if __name__ == "__main__":
+    dt50 = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/sift/0_0_50.pkl', 'rb'))
+    dt100 = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/sift/0_0_100.pkl', 'rb'))
+
     #run_bow_video(sys.argv[1:])
+
     bow_video_representation(
         '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/',
-        'femo_vgg.pkl',
+        'femo_vgg_fc7.pkl',
         '',
-        '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/',
-        [10], 0, 1
+        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
+        [50], 1, 2
     )

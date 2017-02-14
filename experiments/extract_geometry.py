@@ -95,5 +95,7 @@ def run_extract_geometry(argv):
     extract_geometry(path2model, path2faces, path2save, start, stop)
 
 if __name__ == '__main__':
-    #dt = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/femo_geom_csdm3_4.pkl', 'rb'))
-    run_extract_geometry(sys.argv[1:])
+    dt = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/geoms/femo_geom_csdm_3.pkl', 'rb'))
+
+    pass
+    #run_extract_geometry(sys.argv[1:])
