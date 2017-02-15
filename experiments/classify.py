@@ -4,6 +4,7 @@ from data import FakeEmo
 import cPickle
 from sklearn.svm import LinearSVC
 from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
 import numpy as np
 import getopt
 import sys
@@ -141,6 +142,31 @@ def classify_sequence(path2data, path2save, n_clusters, mode='12classes', save=F
 
     print np.mean(np.reshape(results, (-1,len(n_clusters))), axis=0)
 
+def classify_vgg(path2data, start_person, stop_person, mode):
+    femo = FakeEmo(path2data)
+    clf = LinearSVC()
+    data = cPickle.load(open(path2data+'femo_vgg_fc7_0.pkl', 'rb'))
+
+    results = []
+    # Leave one out
+    for leave in range(start_person, stop_person):
+        (X_tr, y_tr), (X_te, y_te) = femo.leave_one_out(data, leave, format='frames')
+
+        (X_tr_,y_tr_) = change_classes(X_tr, y_tr, mode)
+        (X_te_,y_te_) = change_classes(X_te, y_te, mode)
+
+        if X_tr_ and X_te_:
+            # Train
+            clf.fit(X_tr_, y_tr_)
+
+            # Predict
+            y_te_pred = clf.predict(X_te_)
+
+            # Eval
+            results.append(accuracy_score(y_te_, y_te_pred))
+
+
+    print np.mean(results, axis=0)
 
 def run_classify(argv):
     opts, args = getopt.getopt(argv, '')

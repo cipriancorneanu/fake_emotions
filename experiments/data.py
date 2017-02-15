@@ -140,6 +140,8 @@ class FakeEmo:
                             X.append(np.concatenate(emo))
                         elif format=='vgg_sequences':
                             X.append(np.asarray(emo))
+                        elif format=='vgg_pool5_sequences':
+                            X.append(np.asarray([np.reshape(d, -2) for d in data[0]]))
         return (X,y)
 
 if __name__ == '__main__':
@@ -147,6 +149,4 @@ if __name__ == '__main__':
     path2save = '/home/corneanu/data/fake_emotions/extracted_faces/'
 
     femo = FakeEmo(path2load)
-
-    #femo.format_feat_fnames(path2load)
     femo.read(path2load, path2save, 'femo_vgg_fc7_')

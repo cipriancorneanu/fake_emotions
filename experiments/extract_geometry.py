@@ -95,7 +95,16 @@ def run_extract_geometry(argv):
     extract_geometry(path2model, path2faces, path2save, start, stop)
 
 if __name__ == '__main__':
-    dt = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/geoms/femo_geom_csdm_3.pkl', 'rb'))
+    preds = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/geoms/femo_geom_csdm_15.pkl', 'rb'))
+    ims = cPickle.load(open('/Users/cipriancorneanu/Research/data/fake_emotions/extracted_faces/femo_extracted_faces_15_1.pkl', 'rb'))
 
-    pass
+
+    for i,(p, im) in enumerate(zip(preds[1][::20], ims[::20])):
+        # Show
+        fig, (ax) = plt.subplots(1, 1)
+        ax.imshow(np.squeeze(im))
+        ax.scatter(p.reshape(68,-1)[17:,1], p.reshape(68,-1)[17:,0])
+
+        plt.savefig('./prediction'+str(i)+'.png')
+
     #run_extract_geometry(sys.argv[1:])
