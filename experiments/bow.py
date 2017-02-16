@@ -123,7 +123,6 @@ def bow_video_representation(path2data, fname, path2kmeans, path2save, n_cluster
                             open(path2save + str(leave) + '_' + str(i_s) + '_' + str(km['n_clusters'])+ '.pkl', 'wb'),
                              cPickle.HIGHEST_PROTOCOL)
 
-
 def run_bow_video(argv):
     opts, args = getopt.getopt(argv, '')
     (path2data, fname, path2kmeans, path2save, n_clusters, start, stop) = \
@@ -145,8 +144,8 @@ def run_bow_frame(argv):
 if __name__ == "__main__":
     #run_bow_video(sys.argv[1:])
     bow_video_representation(
-        '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/',
-        'femo_vgg_fc7.pkl',
+        '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
+        'femo_sift_small.pkl',
         '',
         '/Users/cipriancorneanu/Research/data/fake_emotions/sift/',
         [50], 1, 2

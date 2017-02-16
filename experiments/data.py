@@ -119,7 +119,6 @@ class FakeEmo:
         elif format=='vgg_sequences':
             return (self.prepare_sequences([data[x] for x in train], format), self.prepare_sequences([data[x] for x in test], format))
 
-
     def prepare_frames(self, data):
         X, y = ([],[])
         for i_pers,pers in enumerate([x for x in data if x is not None]):
@@ -143,7 +142,7 @@ class FakeEmo:
                         elif format=='vgg_pool5_sequences':
                             X.append(np.asarray([np.reshape(d, -2) for d in data[0]]))
         return (X,y)
-
+    
 if __name__ == '__main__':
     path2load = '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/VGGOrigFC7Fake/'
     path2save = '/home/corneanu/data/fake_emotions/extracted_faces/'
