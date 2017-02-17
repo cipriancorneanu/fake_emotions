@@ -6,10 +6,57 @@ from data import *
 import sklearn.model_selection
 from  sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+import scipy.stats as ss
+import matplotlib.pyplot as plt
+from scipy.stats import norm
+from sift import DescriptorSift
+
+def normal_pool(N, n):
+    # Create normal distribution with 95% in the central 50% of the seq
+    prob = norm.pdf(range(0,N), loc=N/2, scale=N/8)
+    prob = prob/np.sum(prob)
+
+    # Return sorted pooling
+    return np.sort(np.random.choice(range(0,N), size = n, replace = False, p = prob))
+
+def extract_descriptor(sift, im, lm):
+    return sift.extract(im, lm, np.arange(0, im.shape[0]), {'num_bins':8, 'window_sizes':32})
+
+def load_sift(path, fname):
+    pass
+
+def order_geometries(geoms):
+    indices, nindices = (range(0,12), [3,4,8,5,2,0,9,10,7,11,1,6])
+
+    for i_p, person in enumerate(geoms):
+        new_person = [None]*12
+        for i, ni in zip(indices, nindices):
+            new_person[i] = person[ni]
+        geoms[i_p] = new_person
+
+    return geoms
+
+def read_sift(path2faces, path2geoms, persons):
+    if os.path.exists(path2geoms+'femo_geom_raw.pkl'):
+        geoms =  cPickle.load(open(path2geoms+'femo_geom_raw.pkl', 'rb'))
+
+    n_classes = 12
+
+    data = [[None for _ in range(n_classes)] for _ in range(0, len(persons))]
+    sift = DescriptorSift()
+    for i_p, p_key in enumerate(persons):
+        for t_key in range(0,2):#n_classes):
+            print 'person:{} target:{}'.format(str(p_key),t_key)
+
+            fname = path2faces+'femo_extracted_faces_'+str(p_key)+'_'+str(t_key)+'.pkl'
+            if os.path.exists(fname):
+                ims =  cPickle.load(open(fname, 'rb'))
+                data[i_p][t_key] = extract_descriptor(sift, ims, geoms[p_key-1][t_key])
+    return data
 
 def full_bow(path2data, fname):
     n_persons = 2
-    n_clusters = [20, 50, 100]
+    n_clusters = [50, 100, 200]
     vars = [0.9, 0.95, 0.99]
 
     # Load data
@@ -29,7 +76,7 @@ def full_bow(path2data, fname):
         for i_v, var in enumerate(vars):
             print '     Variance {}'.format(var)
             # Perform PCA
-            pca = PCA(n_components=var, whiten=True).fit(np.concatenate(X_ftr))
+            pca = PCA(n_components=var, whiten=True).fit(np.concatenate(X_ftr)[::5])
             X_ftr_pca = [pca.transform(x) for x in X_ftr]
             X_fte_pca = [pca.transform(x) for x in X_fte]
 
@@ -43,12 +90,8 @@ def full_bow(path2data, fname):
             # Per frame representation
             print '             Classification with frame features'
             for i_n, (x_tr, x_te) in enumerate(zip(feat_X_ftr, feat_X_fte)):
-                # Change classes
-                #(x_tr, y_tr) = change_classes(x_tr['feats'], y_ftr, mode='6classes_true')
-                #(x_te, y_te) = change_classes(x_te['feats'], y_fte, mode='6classes_true')
-
-                # Train
-                clf.fit(x_tr['feats'], y_ftr)
+                # Train with 20% of the data
+                clf.fit(x_tr['feats'][::5], y_ftr[::5])
 
                 # Predict
                 y_te_pred = clf.predict(x_te['feats'])
@@ -59,10 +102,6 @@ def full_bow(path2data, fname):
             # Per sequence representation
             print '             Classificaton with sequence features'
             for i_n, (x_tr, x_te) in enumerate(zip(feat_X_str, feat_X_ste)):
-                # Change classes
-                #(x_tr, y_tr) = change_classes(x_tr['feats'], y_ftr, mode='6classes_true')
-                #(x_te, y_te) = change_classes(x_te['feats'], y_fte, mode='6classes_true')
-
                 # Train
                 clf.fit(np.asarray(x_tr['feats']), y_str)
 
@@ -76,5 +115,19 @@ def full_bow(path2data, fname):
     print np.mean(results_seq, axis = 0)
 
 if __name__ == '__main__':
-    full_bow('/Users/cipriancorneanu/Research/data/fake_emotions/sift/', 'femo_sift_small.pkl')
+    #persons = np.random.choice(range(0,54), 54, replace=False)
+    persons = [12, 15]
+    sift = read_sift(
+        '/Users/cipriancorneanu/Research/data/fake_emotions/extracted_faces/',
+        '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/',
+        persons
+    )
+
+    cPickle.dump(
+        sift,
+        open('/Users/cipriancorneanu/Research/data/fake_emotions/sift/femo_sift_sem.pkl', 'wb'),
+        cPickle.HIGHEST_PROTOCOL
+    )
+
+    #full_bow('/Users/cipriancorneanu/Research/data/fake_emotions/sift/', 'femo_sift_small.pkl')
 
