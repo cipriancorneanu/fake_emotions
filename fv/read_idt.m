@@ -10,16 +10,18 @@ actors = {'Laur', 'Alena', 'Ahmed', 'Andreas', 'Anton', 'Chris', 'Dona', 'Darwin
     'nana', 'sinle', 'yiiri', 'Victor', ...
     'age', 'anne', 'Teddy', 'Asif', 'Rezwan', 'Sameer', 'Reena', 'toomas', 'Lembit', 'Yeh',...
     'Umesh', 'Airiin'};
-actors_left = {'Kaisa', 'anee', 'Zemiao', 'AleksanderMakarov', 'Lukas'};
-sort(actors)
+
+actors_left = sort({'Kaisa', 'anee', 'Zemiao', 'AleksanderMakarov', 'Lukas'});
+actors = sort(actors);
+indices_left = [5,24,46,48,49];
+
 emos = {'N2Sur', 'N2S', 'N2H', 'N2D', 'N2C', 'N2A', 'S2N2H', ....
             'H2N2D', 'H2N2C', 'H2N2A', 'D2N2Sur', 'H2N2S'};
 labels = [3, 1, 0, 4, 2, 5, 6, 10, 8, 11, 9, 7];
-pcadim = 64;
 trajPath = '/data/hupba2/Derived/improved_dense_trajectories/fake_faces/';
 path = '/home/corneanu/data/fake_emotions/idt/';
 
-for i = 1 : length(actors)
+for i = 1 : length(actors_left)
     % sample the training folds
     TrainfeatsMBH = [];
     TrainfeatsHOG = [];
@@ -30,7 +32,7 @@ for i = 1 : length(actors)
     slices = [];
     start = 1;
     fprintf('Accumulating trajectories for actor %d\n',i)
-    act = actors{i};
+    act = actors_left{i};
     
     for l = 1:size(emos,2)
         fprintf('\tEmotion %d\n', l)      
@@ -64,7 +66,7 @@ for i = 1 : length(actors)
         TrainfeatsHOG = single(TrainfeatsHOG);
         TrainfeatsHOF = single(TrainfeatsHOF);
 
-        save(strcat(path, str(i), '.mat'), 'Trainstats', 'Trainpoints',...
+        save(strcat(path, str(indices_left(i)), '.mat'), 'Trainstats', 'Trainpoints',...
         'TrainfeatsHOG', 'TrainfestsHOF', 'TrainfeatsMBH' , 'slices', 'lbl')
     else
        fprintf(strcat('Actor', act, ' not found \n')); 
