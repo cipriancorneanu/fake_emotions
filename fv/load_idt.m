@@ -15,21 +15,22 @@ function [hog, hof, mbh, slices, labels ] = load_idt( path )
 
     % Remove current and parent dir from subdirs
     files(invalid_index) = []
-    correction = [(0:11)',(1:12)'];
     
-    hog = cell(1, length(files));
-    hof = cell(1, length(files));
-    mbh = cell(1, length(files));
-    slices = cell(1, length(files));
-    labels = cell(1, length(files));
+    len = length(files);
     
-    for i = 1:length(files)
+    hog = cell(1,len);
+    hof = cell(1,len);
+    mbh = cell(1,len);
+    slices = cell(1,len);
+    labels = cell(1,len);
+    
+    for i = 1:len
        fname = strcat(path, files(i));
        data = load(fname{1});
        hog{i} = data.TrainfeatsHOF;
        hof{i} = data.TrainfeatsHOG;
        mbh{i} = data.TrainfeatsMBH;
-       slices{i} = data.slices - correction;
+       slices{i} = data.slices - [(0:size(data.slices,1)-1)',(1:size(data.slices,1))'];
        labels{i} = data.lbl;
     end
 end
