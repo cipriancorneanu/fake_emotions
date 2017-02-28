@@ -4,7 +4,7 @@ from bow import *
 from classify import *
 from data import *
 import sklearn.model_selection
-from  sklearn.decomposition import PCA
+from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 import scipy.stats as ss
 import matplotlib.pyplot as plt
@@ -113,21 +113,4 @@ def full_bow(path2data, fname):
 
     print np.mean(results_frame, axis = 0)
     print np.mean(results_seq, axis = 0)
-
-if __name__ == '__main__':
-    #persons = np.random.choice(range(0,54), 54, replace=False)
-    persons = [12, 15]
-    sift = read_sift(
-        '/Users/cipriancorneanu/Research/data/fake_emotions/extracted_faces/',
-        '/Users/cipriancorneanu/Research/data/fake_emotions/geoms/',
-        persons
-    )
-
-    cPickle.dump(
-        sift,
-        open('/Users/cipriancorneanu/Research/data/fake_emotions/sift/femo_sift_sem.pkl', 'wb'),
-        cPickle.HIGHEST_PROTOCOL
-    )
-
-    #full_bow('/Users/cipriancorneanu/Research/data/fake_emotions/sift/', 'femo_sift_small.pkl')
 

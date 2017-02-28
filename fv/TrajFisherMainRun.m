@@ -5,19 +5,22 @@ close all;
 addpath(genpath('../../vlfeat-0.9.20'));
 vl_setup;
 
-addpath('/home/kulkarni/softs/libsvm-3.22/matlab');
-savepath('/home/corneanu/data/fake_emotions/idt/gmm/full/')
+%addpath('/home/kulkarni/softs/libsvm-3.22/matlab');
+addpath('/Users/cipriancorneanu/Research/code/libsvm-3.22/matlab/');
+savepath('/home/corneanu/data/fake_emotions/idt/gmm/full/');
 
-trajPath = '/home/corneanu/data/fake_emotions/idt/';
+%trajPath = '/home/corneanu/data/fake_emotions/idt/';
+trajPath = '/Users/cipriancorneanu/Research/data/fake_emotions/improved_dense_trajectories/';
 corr_recog = 0;
-total_eg = 0;
-confusion = zeros(12,12);   
+total_eg = 0;  
 boost = 20;
+numCenters = [3];
+C = 10.^(-3:3);
     
 [hog, hof, mbh, slices, lbls] = load_idt(trajPath);
 descriptor = {hog};
 
-res = zeros(length(descriptor), length(descriptor{1}));
+res = zeros(length(descriptor{1}));
 
 for d = 1:length(descriptor)
     fprintf('-------->FV with descriptor %d\n', d);
@@ -25,6 +28,8 @@ for d = 1:length(descriptor)
     folds = 1:length(descr);
     
     for i = 1:length(descr)   
+        confusion = zeros(12,12); 
+        
         %% Define train and test
         folds_test = i;
         folds_train = setdiff(folds, folds_test);
@@ -40,9 +45,8 @@ for d = 1:length(descriptor)
         test = descr{folds_test};
         slices_test = slices{folds_test};
         labels_test = lbls{folds_test};
-
-        numCenters = [256, 512];
-        for n = 1:len(numCenters)
+        
+        for n = 1:length(numCenters)
             %% Compute GMMs for from training data
             fprintf('Computing GMMs fold %d centers %d\n',i,numCenters(n));
             train_data = cat(1,train{:});
@@ -50,7 +54,7 @@ for d = 1:length(descriptor)
             sampled_train_data = train_data(randsample(size(train_data, 1), int64(size(train_data, 1)/10)), :);
 
             [mu,sigma,w] = ComputeKmeans(sampled_train_data,numCenters(n));
-            save([savepath,'gmm_', d, '_', i, '_', n, '.mat'], 'mu', 'sigma', 'w');
+            %save([savepath,'gmm_', d, '_', i, '_', n, '.mat'], 'mu', 'sigma', 'w');
                  
             %% Compute FV per sequences train
             fishervecstrain = []; lbltrain=[]; fishervecstest=[];lbltest=[];
@@ -97,27 +101,29 @@ for d = 1:length(descriptor)
             %size(fishervecstrain)
             %size(fishervecstest)
 
-            fprintf('Training SVMs fold %d centers %d\n cost %d\n ',i,numCenters, c);
-            options = '-s 0 -t 0 -c 100 -b 1 -q ';
-            faceModel = libsvmtrain(double(lbltrain),double(fishervecstrain'), options);
-            fprintf('Testing SVMs fold %d centers %d\n',i,numCenters);
+            for i_c = 1:length(C)
+                c = C(i_c);
+                fprintf('Descriptor %d; Fold %d; NumCenters %d; Cost %d; ', ... 
+                        d, i, numCenters(n), C(i_c));
+                options = ['-s 0 -t 0 -c ', num2str(c),' -b 1 -q '];
+                faceModel = libsvmtrain(double(lbltrain),double(fishervecstrain'), options);
+                %fprintf('Testing SVMs fold %d centers %d\n ',i,numCenters);
 
-            [predicted_label, accuracy,prob_estimates] = libsvmpredict(double(lbltest), double(fishervecstest'), faceModel, '-b 1');
-            %fprintf('accuracy=%f\n',accuracy);
-            
-            for j = 1:size(predicted_label,1)
-                if predicted_label(j)== lbltest(j)
-                    corr_recog = corr_recog+1;
+                [predicted_label, accuracy,prob_estimates] = libsvmpredict(double(lbltest), double(fishervecstest'), faceModel, '-b 1');
+                %fprintf('accuracy=%f\n',accuracy);
+
+                for j = 1:size(predicted_label,1)
+                    if predicted_label(j)== lbltest(j)
+                        corr_recog = corr_recog+1;
+                    end;
+
+                    total_eg = total_eg+1;
+                    confusion(lbltest(j)+1,predicted_label(j)+1) = confusion(lbltest(j)+1,predicted_label(j)+1) +1;
                 end;
-                
-                total_eg = total_eg+1;
-                confusion(lbltest(j)+1,predicted_label(j)+1) = confusion(lbltest(j)+1,predicted_label(j)+1) +1;
-            end;
-            confusion
-            save([savepath,'conf_', num2str(d), '_', num2str(i), '_', num2str(n), '.mat'], 'confusion');
-            res(d,i,n) = accuracy(1);  
-        end; 
+                res(i) = accuracy(1);
+            end
+            %save([savepath,'conf_', num2str(d), '_', num2str(i), '_', num2str(n), '.mat'], 'confusion');
+        end;    
    end;
 end;
 
-res

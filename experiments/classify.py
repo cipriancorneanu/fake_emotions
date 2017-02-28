@@ -178,57 +178,6 @@ def run_classify(argv):
     classify_frame(path2data, path2save, n_clusters, partitions, ds)
 
 if __name__ == '__main__':
-    path_sift =  '/Users/cipriancorneanu/Research/data/fake_emotions/vgg/'
 
-    print 'Sequence classification'
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '12classes'
-    )
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '6classes_true'
-    )
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '6classes_fake'
-    )
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '2classes_happy'
-    )
+    pass
 
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '2classes_sad'
-    )
-
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '2classes_contempt'
-    )
-
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '2classes_surprised'
-    )
-
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '2classes_disgusted'
-    )
-
-    classify_sequence(
-        path_sift + 'bow_per_video/',
-        path_sift + 'bow_per_video/',
-        [50,100,200], '2classes_angry'
-    )
-    #run_classify(sys.argv[1:])
