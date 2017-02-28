@@ -137,6 +137,8 @@ class FakeEmo:
                         y.append(i_emo)
                         if format=='sift_sequences':
                             X.append(np.concatenate(emo))
+                        elif format=='sift_sequences_avg':
+                            X.append(np.mean(emo, axis=0))
                         elif format=='vgg_sequences':
                             X.append(np.asarray(emo))
                         elif format=='vgg_pool5_sequences':
