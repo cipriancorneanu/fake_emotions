@@ -21,8 +21,10 @@ X = np.asarray(X)
 X = np.reshape(X, (X.shape[0], -1))
 
 # Select true classes only
-X, y = change_classes(X, y, mode = '2classes_sad')
+X, y = change_classes(X, y, mode = '12classes')
 X, y = np.asarray(X), np.asarray(y)
+
+# Average
 
 # Reduce dimensionality
 pca = PCA(n_components=0.95, whiten=True).fit(X[::5])
@@ -34,7 +36,7 @@ clf = LinearSVC()
 n_repetitions = 5
 accuracy = []
 
-for i in range(0,n_repetitions):
+for i in range(0, n_repetitions):
     (X_tr, X_te, y_tr, y_te)  = train_test_split(X, y, test_size=0.2)
 
     # Train
