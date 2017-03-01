@@ -20,7 +20,7 @@ femo = FakeEmo('')
 X, y = femo.prepare_sequences(data, format='sift_sequences')
 
 clf = LinearSVC()
-n_clusters = [256]
+n_clusters = [4]
 results = np.zeros((n_persons, len(n_clusters)))
 
 for leave_out in range(0, n_persons):

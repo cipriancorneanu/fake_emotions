@@ -34,20 +34,24 @@ X = pca.transform(X)
 clf = LinearSVC()
 
 n_repetitions = 5
-accuracy = []
+for pool_length in [10, 100, 1000, 10000, 20000]:
+    accuracy = []
+    for i in range(0, n_repetitions):
+        (X_tr, X_te, y_tr, y_te)  = train_test_split(X, y, test_size=0.2)
 
-for i in range(0, n_repetitions):
-    (X_tr, X_te, y_tr, y_te)  = train_test_split(X, y, test_size=0.2)
+        pool = np.random.choice(len(X_tr), pool_length, replace=False)
+        X_tr = X_tr[pool]
+        y_tr = y_tr[pool]
 
-    # Train
-    clf.fit(X_tr, y_tr)
+        # Train
+        clf.fit(X_tr, y_tr)
 
-    # Predict
-    y_te_pred = clf.predict(X_te)
+        # Predict
+        y_te_pred = clf.predict(X_te)
 
-    # Eval
-    accuracy.append(accuracy_score(y_te, y_te_pred))
-    print 'Accuracy={}'.format(accuracy_score(y_te, y_te_pred))
-    print confusion_matrix(y_te, y_te_pred)
+        # Eval
+        accuracy.append(accuracy_score(y_te, y_te_pred))
+        #print 'Accuracy={}'.format(accuracy_score(y_te, y_te_pred))
+        #print confusion_matrix(y_te, y_te_pred)
 
-print np.mean(accuracy)
+    print '#samples: {}; accuracy: {}'.format(pool_length, np.mean(accuracy))

@@ -114,3 +114,10 @@ def full_bow(path2data, fname):
     print np.mean(results_frame, axis = 0)
     print np.mean(results_seq, axis = 0)
 
+
+if __name__ == '__main__':
+    path2faces = '/home/corneanu/data/fake_emotions/extracted_faces/'
+    path2geoms = '/home/corneanu/data/fake_emotions/geoms/'
+    dt = read_sift(path2faces, path2geoms, range(6,20))
+
+    cPickle.dump(open('home/corneanu/data/fake_emotions/sift/'+'femo_sift_sem_6_20'))
