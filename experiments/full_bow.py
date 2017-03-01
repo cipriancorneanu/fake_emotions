@@ -45,7 +45,7 @@ def read_sift(path2faces, path2geoms, persons):
     data = [[None for _ in range(n_classes)] for _ in range(0, len(persons))]
     sift = DescriptorSift()
     for i_p, p_key in enumerate(persons):
-        for t_key in range(0,2):#n_classes):
+        for t_key in range(0,n_classes):
             print 'person:{} target:{}'.format(str(p_key),t_key)
 
             fname = path2faces+'femo_extracted_faces_'+str(p_key)+'_'+str(t_key)+'.pkl'
