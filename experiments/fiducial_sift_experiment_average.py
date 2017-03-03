@@ -1,7 +1,5 @@
 __author__ = 'cipriancorneanu'
 
-__author__ = 'cipriancorneanu'
-
 import cPickle
 from data import FakeEmo
 from full_bow import *

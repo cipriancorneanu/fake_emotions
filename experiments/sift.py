@@ -38,4 +38,5 @@ class DescriptorSift(Descriptor):
                 ) if jv else 0
 
         # Normalize descriptors, return extracted information
-        return descriptors.reshape((len(mapping), -1))
+        return descriptors
+        #return descriptors.reshape((len(mapping), -1))

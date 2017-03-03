@@ -114,9 +114,8 @@ class FakeEmo:
 
         if format=='frames':
             return (self.prepare_frames([data[x] for x in train]), self.prepare_frames([data[x] for x in test]))
-        elif format=='sift_sequences':
-            return (self.prepare_sequences([data[x] for x in train]), self.prepare_sequences([data[x] for x in test], format))
-        elif format=='vgg_sequences':
+        elif format=='sift_sequences' or format=='sift_sequences_per_frame' or format=='sift_sequences_per_frame_lm' or \
+                        format=='vgg_sequences':
             return (self.prepare_sequences([data[x] for x in train], format), self.prepare_sequences([data[x] for x in test], format))
 
     def prepare_frames(self, data):
@@ -131,20 +130,22 @@ class FakeEmo:
     def prepare_sequences(self, data, format='sift_sequences'):
         X, y = ([],[])
         for i_pers,pers in enumerate([x for x in data if x is not None]):
-                for i_emo,emo in enumerate([x for x in pers]):
-                    if emo is not None:
-                        emo = [x for x in emo if x is not None]
-                        y.append(i_emo)
-                        if format=='sift_sequences':
-                            X.append(np.concatenate(emo))
-                        elif format=='sift_sequences_per_frame':
-                            X.append(np.reshape(np.asarray(emo), (len(emo), -1)))
-                        elif format=='sift_sequences_avg':
-                            X.append(np.mean(emo, axis=0))
-                        elif format=='vgg_sequences':
-                            X.append(np.asarray(emo))
-                        elif format=='vgg_pool5_sequences':
-                            X.append(np.asarray([np.reshape(d, -2) for d in data[0]]))
+            for i_emo,emo in enumerate([x for x in pers]):
+                if emo is not None:
+                    emo = [x for x in emo if x is not None]
+                    y.append(i_emo)
+                    if format=='sift_sequences':
+                        X.append(np.concatenate(emo))
+                    elif format=='sift_sequences_per_frame':
+                        X.append(np.reshape(np.asarray(emo), (len(emo), -1)))
+                    elif format == 'sift_sequences_per_frame_lm':
+                        X.append(np.asarray(emo))
+                    elif format=='sift_sequences_avg':
+                        X.append(np.mean(emo, axis=0))
+                    elif format=='vgg_sequences':
+                        X.append(np.asarray(emo))
+                    elif format=='vgg_pool5_sequences':
+                        X.append(np.asarray([np.reshape(d, -2) for d in data[0]]))
         return (X,y)
     
 if __name__ == '__main__':
